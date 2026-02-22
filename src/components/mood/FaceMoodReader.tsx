@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera, X, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -266,75 +267,235 @@ const FaceMoodReader = ({ onMoodDetected }: FaceMoodReaderProps) => {
         <span className="text-sm">Face Mood Scan</span>
       </Button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card rounded-2xl shadow-2xl border border-border w-full max-w-sm overflow-hidden">
-            <div className="p-4 flex items-center justify-between border-b border-border">
-              <h3 className="font-display font-bold text-foreground flex items-center gap-2">
-                <Camera className="w-5 h-5 text-primary" />
+      {isOpen && createPortal(
+        /* Full-screen backdrop — renders on document.body, immune to parent CSS */
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+        >
+          {/* ── Camera block ───────────────────────────────────────── */}
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '420px',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              background: '#000',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
+              /* On phones: make it almost full-height so camera fills screen */
+              aspectRatio: '3/4',
+            }}
+          >
+            {/* Live video — fills the whole block */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transform: 'scaleX(-1)',
+                display: 'block',
+              }}
+            />
+            <canvas ref={canvasRef} className="hidden" />
+
+            {/* ── Floating close button — top-right corner of the camera ── */}
+            <button
+              onClick={close}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: 'rgba(0,0,0,0.55)',
+                border: '1.5px solid rgba(255,255,255,0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 10,
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+              }}
+            >
+              <X style={{ width: 18, height: 18, color: '#fff' }} />
+            </button>
+
+            {/* ── Label — top-left corner ── */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(0,0,0,0.55)',
+                borderRadius: '999px',
+                padding: '5px 12px',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                border: '1px solid rgba(255,255,255,0.15)',
+              }}
+            >
+              <Camera style={{ width: 14, height: 14, color: 'var(--primary, #6366f1)' }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#fff', letterSpacing: '.02em' }}>
                 Face Mood Reader
-              </h3>
-              <Button size="icon" variant="ghost" onClick={close} className="h-8 w-8">
-                <X className="w-4 h-4" />
-              </Button>
+              </span>
             </div>
 
-            <div className="p-4 space-y-4">
-              <div className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3]">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover mirror"
-                  style={{ transform: 'scaleX(-1)' }}
+            {/* ── Corner guide brackets ── */}
+            {!isAnalyzing && !result && (
+              <>
+                {[
+                  { top: '50%', left: '50%', transform: 'translate(-90px, -110px)', borderTop: '2.5px solid', borderLeft: '2.5px solid' },
+                  { top: '50%', left: '50%', transform: 'translate(62px, -110px)',  borderTop: '2.5px solid', borderRight: '2.5px solid' },
+                  { top: '50%', left: '50%', transform: 'translate(-90px, 82px)',   borderBottom: '2.5px solid', borderLeft: '2.5px solid' },
+                  { top: '50%', left: '50%', transform: 'translate(62px, 82px)',    borderBottom: '2.5px solid', borderRight: '2.5px solid' },
+                ].map((s, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      width: 28,
+                      height: 28,
+                      borderColor: 'rgba(255,255,255,0.7)',
+                      borderRadius: 3,
+                      ...s,
+                    }}
+                  />
+                ))}
+              </>
+            )}
+
+            {/* ── Analysing overlay ── */}
+            {isAnalyzing && (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                }}
+              >
+                <Loader2
+                  style={{
+                    width: 36,
+                    height: 36,
+                    color: 'var(--primary, #6366f1)',
+                    animation: 'spin 1s linear infinite',
+                  }}
                 />
-                <canvas ref={canvasRef} className="hidden" />
-                {isAnalyzing && (
-                  <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                    <div className="text-center space-y-2">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-                      <p className="text-sm text-foreground">{mlStage}</p>
-                    </div>
-                  </div>
-                )}
+                <p style={{ color: '#fff', fontSize: 13, fontWeight: 500, margin: 0 }}>
+                  {mlStage}
+                </p>
               </div>
+            )}
+          </div>
 
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
-              )}
+          {/* ── Result card — appears below camera ───────────────────── */}
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              marginTop: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+            }}
+          >
+            {error && (
+              <p
+                style={{
+                  background: 'rgba(239,68,68,0.15)',
+                  border: '1px solid rgba(239,68,68,0.35)',
+                  borderRadius: 12,
+                  padding: '10px 14px',
+                  fontSize: 13,
+                  color: '#f87171',
+                  textAlign: 'center',
+                  margin: 0,
+                }}
+              >
+                {error}
+              </p>
+            )}
 
-              {result && (
-                <div className="bg-primary/5 rounded-xl p-4 space-y-2 animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <span className="text-4xl">{moodEmojis[result.mood] || '🤔'}</span>
-                    <div>
-                      <p className="font-bold text-foreground capitalize">{result.mood}</p>
-                      <p className="text-xs text-muted-foreground">{result.confidence}% confident</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-foreground">{result.description}</p>
-                  <div className="bg-primary/10 rounded-lg p-3 mt-2">
-                    <p className="text-xs text-primary font-medium">💡 Suggestion</p>
-                    <p className="text-sm text-foreground">{result.wellness_tip}</p>
+            {result && (
+              <div
+                className="animate-fade-in"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 16,
+                  padding: '14px 16px',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 38 }}>{moodEmojis[result.mood] || '🤔'}</span>
+                  <div>
+                    <p style={{ fontWeight: 700, fontSize: 17, color: '#fff', margin: 0, textTransform: 'capitalize' }}>
+                      {result.mood}
+                    </p>
+                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>
+                      {result.confidence}% confidence
+                    </p>
                   </div>
                 </div>
-              )}
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={captureAndAnalyze}
-                  disabled={isAnalyzing}
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', margin: 0, lineHeight: 1.55 }}>
+                  {result.description}
+                </p>
+                <div
+                  style={{
+                    background: 'rgba(99,102,241,0.15)',
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    display: 'flex',
+                    gap: 8,
+                  }}
                 >
-                  {result ? <RefreshCw className="w-4 h-4 mr-2" /> : <Camera className="w-4 h-4 mr-2" />}
-                  {result ? 'Scan Again' : 'Capture & Analyze'}
-                </Button>
+                  <span style={{ fontSize: 16 }}>💡</span>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>
+                    {result.wellness_tip}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* ── Capture / Scan Again button ── */}
+            <Button
+              onClick={captureAndAnalyze}
+              disabled={isAnalyzing}
+              style={{ width: '100%', height: 48, borderRadius: 14, fontSize: 15, fontWeight: 700 }}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {result ? <RefreshCw className="w-4 h-4 mr-2" /> : <Camera className="w-4 h-4 mr-2" />}
+              {result ? 'Scan Again' : 'Capture & Analyze'}
+            </Button>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 };
