@@ -8,6 +8,9 @@ export interface UserData {
   aboutYourself: string;
   happinessIndex: number;
   healthIndex: number;
+  occupation: string;
+  country: string;
+  collegeStressors: string[];
 }
 
 interface UserContextType {

@@ -13,7 +13,10 @@ import YogaTab from '@/components/tabs/YogaTab';
 import BreathingTab from '@/components/tabs/BreathingTab';
 import BooksTab from '@/components/tabs/BooksTab';
 import FloatingChat from '@/components/chat/FloatingChat';
-import { Heart, Music, Flower2, Wind, BookOpen, Phone, LogOut, Sparkles } from 'lucide-react';
+import MoodJournal from '@/components/journal/MoodJournal';
+import PeerSupport from '@/components/community/PeerSupport';
+import FaceMoodReader from '@/components/mood/FaceMoodReader';
+import { Heart, Music, Flower2, Wind, BookOpen, Phone, LogOut, Sparkles, BookHeart, Users, Camera } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -53,6 +56,7 @@ const Dashboard = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <FaceMoodReader />
             <Button
               variant="outline"
               size="sm"
@@ -85,6 +89,12 @@ const Dashboard = () => {
 
         {/* Personalized Suggestions */}
         <DashboardSuggestions onSuggestionClick={setActiveTab} />
+
+        {/* Mood Journal & Peer Support */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          <MoodJournal />
+          <PeerSupport />
+        </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
