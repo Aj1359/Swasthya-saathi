@@ -1,6 +1,9 @@
- 🏗️ SwasthyaSaathi Architecture
+# 🏗️ SwasthyaSaathi Architecture
+
 This document provides a detailed overview of the SwasthyaSaathi application architecture.
+
 ## 📐 System Architecture
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         CLIENT (Browser)                             │
@@ -61,8 +64,11 @@ This document provides a detailed overview of the SwasthyaSaathi application arc
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
 ## 🧩 Component Architecture
+
 ### Core Components
+
 ```
 src/
 ├── components/
@@ -93,7 +99,9 @@ src/
 │       ├── tabs.tsx
 │       └── ...
 ```
+
 ### State Management
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      UserContext                             │
@@ -122,8 +130,11 @@ src/
 │  swasthyasaathi_daily_YYYY-MM-DD → Daily activity logs      │
 └─────────────────────────────────────────────────────────────┘
 ```
+
 ## 🔄 Data Flow
+
 ### User Onboarding Flow
+
 ```
 Landing Page
      │
@@ -153,7 +164,9 @@ Save to UserContext + localStorage
      ▼
 Navigate to Dashboard
 ```
+
 ### Activity Tracking Flow
+
 ```
 User Action (e.g., meditation)
      │
@@ -178,7 +191,9 @@ User Action (e.g., meditation)
      ▼
 UI Updates (Cards, Charts)
 ```
+
 ### AI Chat Flow
+
 ```
 User Message
      │
@@ -214,8 +229,11 @@ Stream chunks to UI
      ▼
 Render with react-markdown
 ```
+
 ## 🎨 Design System
+
 ### Color Palette
+
 ```css
 :root {
   /* Primary - Sage Green */
@@ -234,10 +252,13 @@ Render with react-markdown
   --foreground: 142 20% 20%;
 }
 ```
+
 ### Typography
+
 ```
 Font Family: 'Nunito', sans-serif
 Headings: 'Playfair Display', serif
+
 Scale:
 - h1: 2.5rem (40px)
 - h2: 2rem (32px)
@@ -245,25 +266,33 @@ Scale:
 - body: 1rem (16px)
 - small: 0.875rem (14px)
 ```
+
 ### Animation Classes
+
 ```css
 .animate-fade-in      /* Fade in from opacity 0 */
 .animate-scale-in     /* Scale from 95% to 100% */
 .animate-breathe      /* Breathing animation for exercises */
 .animate-pulse-gentle /* Subtle pulse for active states */
 ```
+
 ## 🔐 Security Considerations
+
 ### Client-Side
 - User data stored in localStorage (client-only)
 - No sensitive data transmitted
 - API keys stored in environment variables
+
 ### Server-Side (Edge Functions)
 - CORS headers configured
 - JWT verification disabled (public endpoint)
 - Rate limiting handled by Lovable AI Gateway
 - No database access required
+
 ## 📦 Dependencies
+
 ### Production Dependencies
+
 | Package | Version | Purpose |
 |---------|---------|---------|
 | react | ^18.3.1 | UI framework |
@@ -274,39 +303,53 @@ Scale:
 | lucide-react | ^0.462.0 | Icons |
 | tailwindcss | ^3.4.x | Styling |
 | @supabase/supabase-js | ^2.95.1 | Backend client |
+
 ### Development Dependencies
+
 | Package | Purpose |
 |---------|---------|
 | vite | Build tool |
 | typescript | Type checking |
 | vitest | Testing |
 | eslint | Linting |
+
 ## 🚀 Deployment
+
 ### Build Process
+
 ```bash
 npm run build
 # Output: dist/
 ```
+
 ### Environment Requirements
+
 ```
 VITE_SUPABASE_URL        # Supabase project URL
 VITE_SUPABASE_PUBLISHABLE_KEY  # Supabase anon key
 LOVABLE_API_KEY          # AI Gateway key (Edge Function secret)
 ```
+
 ### Edge Function Deployment
+
 Edge functions are automatically deployed via Lovable Cloud when code is pushed.
+
 ```
 supabase/functions/
 └── ruhi-chat/
     └── index.ts    # Auto-deployed
 ```
+
 ## 📈 Performance Optimizations
+
 1. **Code Splitting** - React Router lazy loading (future enhancement)
 2. **Audio Streaming** - External CDN for meditation tracks
 3. **Image Optimization** - External CDN for yoga images
 4. **LocalStorage** - Client-side persistence (no database round-trips)
 5. **Streaming AI** - SSE for real-time chat responses
+
 ## 🔮 Future Enhancements
+
 - [ ] User authentication & cloud sync
 - [ ] Push notifications for reminders
 - [ ] Social features (community support)
@@ -314,5 +357,7 @@ supabase/functions/
 - [ ] Multi-language support
 - [ ] Voice-guided meditation
 - [ ] Wearable device integration
+
 ---
+
 *Architecture Document v1.0 - SwasthyaSaathi*
