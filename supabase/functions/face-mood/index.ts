@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, augmentPass } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -21,6 +21,10 @@ serve(async (req) => {
     if (!imageBase64) {
       throw new Error("No image provided");
     }
+
+    const augmentNote = typeof augmentPass === 'number' && augmentPass > 0
+      ? ` This is inference pass ${augmentPass + 1}. Apply slight variation in your analysis perspective to enable ensemble averaging.`
+      : '';
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -33,12 +37,30 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a facial emotion analysis expert. Analyze the face in the image and return a JSON object with these fields:
-- mood: one of "happy", "sad", "angry", "anxious", "neutral", "tired", "stressed"
+            content: `You are an advanced facial emotion and health analysis expert. Analyze the face in the image with clinical precision. You MUST detect subtle expressions including neutral faces.
+
+EMOTION DETECTION RULES:
+- Detect one of: "happy", "sad", "angry", "anxious", "neutral", "tired", "stressed"
+- For NEUTRAL faces: Look carefully at micro-expressions — slight lip tension, eye narrowing, brow position, skin pallor, under-eye darkness
+- A "neutral" face is VALID. Do not force a strong emotion if the face is genuinely neutral
+- Confidence should reflect how clear the expression is (neutral faces can have high confidence too)
+
+UNDERLYING HEALTH INDICATORS (analyze even for neutral faces):
+Look for visible signs of:
+- Sleep deprivation: dark circles, puffy eyes, drooping eyelids
+- Dehydration: dry/cracked lips, sunken eyes
+- Stress/tension: jaw clenching, forehead lines, furrowed brow
+- Fatigue: pale complexion, glazed eyes, slack facial muscles
+- Skin health: acne (stress-related), redness, pallor
+
+Return a JSON object with these fields:
+- mood: one of the 7 emotions above
 - confidence: number 0-100
-- description: one short sentence describing the emotional state
-- wellness_tip: one actionable wellness suggestion based on the detected emotion
-Return ONLY valid JSON, no markdown, no explanation.`
+- description: one sentence describing the emotional state AND any visible health signs
+- wellness_tip: one actionable wellness suggestion based on BOTH the detected emotion AND any health indicators
+- health_flags: array of strings listing any underlying health observations (e.g., ["dark_circles", "tension_lines", "dry_lips"])
+
+Return ONLY valid JSON, no markdown, no explanation.${augmentNote}`
           },
           {
             role: "user",
@@ -51,7 +73,7 @@ Return ONLY valid JSON, no markdown, no explanation.`
               },
               {
                 type: "text",
-                text: "Analyze the facial expression in this photo and detect the mood."
+                text: "Analyze this face for emotional state and any visible health indicators. Be thorough even if the expression appears neutral."
               }
             ]
           }
@@ -78,10 +100,8 @@ Return ONLY valid JSON, no markdown, no explanation.`
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
     
-    // Parse the JSON from the response
     let result;
     try {
-      // Try to extract JSON from potential markdown
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       result = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
     } catch {
@@ -89,9 +109,13 @@ Return ONLY valid JSON, no markdown, no explanation.`
         mood: "neutral",
         confidence: 50,
         description: "Could not clearly analyze the expression",
-        wellness_tip: "Try a quick breathing exercise to center yourself"
+        wellness_tip: "Try a quick breathing exercise to center yourself",
+        health_flags: []
       };
     }
+
+    // Ensure health_flags exists
+    if (!result.health_flags) result.health_flags = [];
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

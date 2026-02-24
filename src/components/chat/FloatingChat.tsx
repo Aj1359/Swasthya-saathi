@@ -94,6 +94,16 @@ const FloatingChat = () => {
       .slice(0, 5);
   };
 
+  const getFaceScanData = () => {
+    const stored = localStorage.getItem('swasthyasaathi_face_scan');
+    return stored ? JSON.parse(stored) : null;
+  };
+
+  const getFaceScanHistory = () => {
+    const stored = localStorage.getItem('swasthyasaathi_face_history');
+    return stored ? JSON.parse(stored).slice(-7) : [];
+  };
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -178,6 +188,8 @@ const FloatingChat = () => {
             ...userData,
             activityData: getActivityContext(),
             journalEntries: getJournalContext(),
+            faceScanData: getFaceScanData(),
+            faceScanHistory: getFaceScanHistory(),
           },
         }),
       });
