@@ -280,16 +280,16 @@ const spiritualLearnings = [
 ];
 
 const videos = [
-  { id: 'v1', category: 'dopamine', title: 'Dopamine Detox: A Short Guide to Remove Your Addiction', channel: 'Improvement Pill', channelAvatar: '💊', duration: '8:32', views: '12M views', thumbnail: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=480&q=80', link: 'https://www.youtube.com/watch?v=9QiE-M1LrZk', tag: 'Dopamine', tagColor: '#7c3aed', synopsis: 'Breaks down how constant digital stimulation hijacks your dopamine system, and walks through a practical 24-hour detox protocol used by thousands to reset motivation and reduce brain fog.' },
-  { id: 'v2', category: 'dopamine', title: "The REAL Reason You Can't Stop Procrastinating", channel: 'Dr. K (HealthyGamerGG)', channelAvatar: '🎮', duration: '22:14', views: '4.3M views', thumbnail: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=480&q=80', link: 'https://www.youtube.com/watch?v=FWTNMzK9vG4', tag: 'Procrastination', tagColor: '#7c3aed', synopsis: 'Dr. K (Harvard psychiatrist) explains why procrastination is an emotional regulation failure, not laziness. Covers shame loops, dopamine avoidance, and why gamers are especially vulnerable — with real tools to break the cycle.' },
-  { id: 'v3', category: 'morning', title: 'The Perfect Morning Routine — Backed by Science', channel: 'Andrew Huberman', channelAvatar: '🧠', duration: '1:54:32', views: '9.1M views', thumbnail: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=480&q=80', link: 'https://www.youtube.com/watch?v=gR_f-iwUGY4', tag: 'Morning', tagColor: '#f97316', synopsis: 'The definitive neuroscience-backed morning protocol: light exposure, caffeine timing, exercise, temperature, and cold exposure. Huberman explains the exact sequence and why the order matters for your cortisol, focus, and nighttime sleep.' },
-  { id: 'v4', category: 'morning', title: 'Why We Sleep — Matthew Walker at Google', channel: 'Talks at Google', channelAvatar: '🔴', duration: '1:04:18', views: '3.7M views', thumbnail: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=480&q=80', link: 'https://www.youtube.com/watch?v=aXflBZXAucQ', tag: 'Sleep', tagColor: '#f97316', synopsis: 'Dr. Matthew Walker (UC Berkeley) presents alarming research on what even moderate sleep deprivation does to your brain, immune system, and emotional regulation. Includes his evidence-backed protocol for fixing sleep without medication.' },
-  { id: 'v5', category: 'energy', title: 'How to Increase Your Willpower & Tenacity', channel: 'Andrew Huberman', channelAvatar: '🧠', duration: '1:48:09', views: '2.9M views', thumbnail: 'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=480&q=80', link: 'https://www.youtube.com/watch?v=CL_RoSBOmKY', tag: 'Energy', tagColor: '#0ea5e9', synopsis: 'Deep dive into the anterior mid-cingulate cortex — the "tenacity centre" of the brain that grows when you do hard things you don\'t want to do. Covers breathwork, cold exposure, and micro-challenges to build sustainable willpower.' },
-  { id: 'v6', category: 'love', title: 'The Brain in Love — Helen Fisher TED Talk', channel: 'TED', channelAvatar: '🔴', duration: '15:47', views: '8.2M views', thumbnail: 'https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=480&q=80', link: 'https://www.youtube.com/watch?v=OYfoGTIG7pY', tag: 'Real Love', tagColor: '#ec4899', synopsis: 'Dr. Helen Fisher scanned brains of people newly in love, long-term couples, and the recently heartbroken. The findings are stunning: romantic love activates the same circuits as cocaine addiction. This talk changed how science understands love.' },
-  { id: 'v7', category: 'love', title: 'Understanding Lust, Love & Attachment', channel: 'Kurzgesagt', channelAvatar: '🐦', duration: '10:02', views: '11.4M views', thumbnail: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=480&q=80', link: 'https://www.youtube.com/watch?v=p_8yK2kmxoo', tag: 'Lust vs Love', tagColor: '#ec4899', synopsis: 'Kurzgesagt\'s animated breakdown of the three biological systems — lust (testosterone), attraction (dopamine), and attachment (oxytocin) — explaining why we often confuse them and how each can exist independently.' },
-  { id: 'v8', category: 'depression', title: 'I Had a Black Dog, His Name Was Depression', channel: 'WHO', channelAvatar: '🌍', duration: '4:31', views: '18M views', thumbnail: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=480&q=80', link: 'https://www.youtube.com/watch?v=XiCrniLQGYc', tag: 'Depression', tagColor: '#6366f1', synopsis: 'A beautifully animated short by the WHO based on Matthew Johnstone\'s book. Describes living with depression through metaphor — what it feels like, how it isolates you, and what helped. One of the most watched mental health videos ever made.' },
-  { id: 'v9', category: 'anxiety', title: 'How to Stop Feeling Anxious About Anxiety', channel: 'TED-Ed', channelAvatar: '🔴', duration: '6:03', views: '5.8M views', thumbnail: 'https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?w=480&q=80', link: 'https://www.youtube.com/watch?v=ZidGozDhOjg', tag: 'Anxiety', tagColor: '#f59e0b', synopsis: 'Explains the anxiety-about-anxiety loop — how fearing the feeling makes it worse — and introduces acceptance-based techniques from ACT (Acceptance and Commitment Therapy) that are more effective than trying to suppress or fight anxiety.' },
-  { id: 'v10', category: 'energy', title: 'The Science of Setting Goals & Motivation', channel: 'Andrew Huberman', channelAvatar: '🧠', duration: '2:03:44', views: '3.1M views', thumbnail: 'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=480&q=80', link: 'https://www.youtube.com/watch?v=t1F7EEGPQwo', tag: 'Focus', tagColor: '#0ea5e9', synopsis: 'The neuroscience of why most people set goals wrong. Covers visual targeting, dopamine scheduling, the role of the amygdala in motivation, and why "pursue the process not the outcome" is neuroscientifically backwards.' },
+  { id: 'v1', category: 'dopamine', title: 'Dopamine Detox: A Short Guide to Remove Your Addiction', channel: 'Improvement Pill', channelAvatar: '💊', duration: '8:32', views: '12M views', thumbnail: 'https://img.youtube.com/vi/9QiE-M1LrZk/hqdefault.jpg', youtubeId: '9QiE-M1LrZk', link: 'https://www.youtube.com/watch?v=9QiE-M1LrZk', tag: 'Dopamine', tagColor: '#7c3aed', synopsis: 'Breaks down how constant digital stimulation hijacks your dopamine system, and walks through a practical 24-hour detox protocol.' },
+  { id: 'v2', category: 'dopamine', title: "The REAL Reason You Can't Stop Procrastinating", channel: 'Dr. K (HealthyGamerGG)', channelAvatar: '🎮', duration: '22:14', views: '4.3M views', thumbnail: 'https://img.youtube.com/vi/FWTNMzK9vG4/hqdefault.jpg', youtubeId: 'FWTNMzK9vG4', link: 'https://www.youtube.com/watch?v=FWTNMzK9vG4', tag: 'Procrastination', tagColor: '#7c3aed', synopsis: 'Dr. K explains why procrastination is an emotional regulation failure, not laziness. Covers shame loops and dopamine avoidance.' },
+  { id: 'v3', category: 'morning', title: 'The Perfect Morning Routine — Backed by Science', channel: 'Andrew Huberman', channelAvatar: '🧠', duration: '1:54:32', views: '9.1M views', thumbnail: 'https://img.youtube.com/vi/gR_f-iwUGY4/hqdefault.jpg', youtubeId: 'gR_f-iwUGY4', link: 'https://www.youtube.com/watch?v=gR_f-iwUGY4', tag: 'Morning', tagColor: '#f97316', synopsis: 'The definitive neuroscience-backed morning protocol: light exposure, caffeine timing, exercise, temperature, and cold exposure.' },
+  { id: 'v4', category: 'morning', title: 'Why We Sleep — Matthew Walker at Google', channel: 'Talks at Google', channelAvatar: '🔴', duration: '1:04:18', views: '3.7M views', thumbnail: 'https://img.youtube.com/vi/aXflBZXAucQ/hqdefault.jpg', youtubeId: 'aXflBZXAucQ', link: 'https://www.youtube.com/watch?v=aXflBZXAucQ', tag: 'Sleep', tagColor: '#f97316', synopsis: 'Dr. Walker presents alarming research on sleep deprivation effects on your brain, immune system, and emotional regulation.' },
+  { id: 'v5', category: 'energy', title: 'How to Increase Your Willpower & Tenacity', channel: 'Andrew Huberman', channelAvatar: '🧠', duration: '1:48:09', views: '2.9M views', thumbnail: 'https://img.youtube.com/vi/CL_RoSBOmKY/hqdefault.jpg', youtubeId: 'CL_RoSBOmKY', link: 'https://www.youtube.com/watch?v=CL_RoSBOmKY', tag: 'Energy', tagColor: '#0ea5e9', synopsis: 'Deep dive into the anterior mid-cingulate cortex — the "tenacity centre" that grows when you do hard things you don\'t want to do.' },
+  { id: 'v6', category: 'love', title: 'The Brain in Love — Helen Fisher TED Talk', channel: 'TED', channelAvatar: '🔴', duration: '15:47', views: '8.2M views', thumbnail: 'https://img.youtube.com/vi/OYfoGTIG7pY/hqdefault.jpg', youtubeId: 'OYfoGTIG7pY', link: 'https://www.youtube.com/watch?v=OYfoGTIG7pY', tag: 'Real Love', tagColor: '#ec4899', synopsis: 'Dr. Helen Fisher scanned brains of people in love. Romantic love activates the same circuits as cocaine addiction.' },
+  { id: 'v7', category: 'love', title: 'Understanding Lust, Love & Attachment', channel: 'Kurzgesagt', channelAvatar: '🐦', duration: '10:02', views: '11.4M views', thumbnail: 'https://img.youtube.com/vi/p_8yK2kmxoo/hqdefault.jpg', youtubeId: 'p_8yK2kmxoo', link: 'https://www.youtube.com/watch?v=p_8yK2kmxoo', tag: 'Lust vs Love', tagColor: '#ec4899', synopsis: 'Kurzgesagt\'s animated breakdown of lust (testosterone), attraction (dopamine), and attachment (oxytocin).' },
+  { id: 'v8', category: 'depression', title: 'I Had a Black Dog, His Name Was Depression', channel: 'WHO', channelAvatar: '🌍', duration: '4:31', views: '18M views', thumbnail: 'https://img.youtube.com/vi/XiCrniLQGYc/hqdefault.jpg', youtubeId: 'XiCrniLQGYc', link: 'https://www.youtube.com/watch?v=XiCrniLQGYc', tag: 'Depression', tagColor: '#6366f1', synopsis: 'A beautifully animated short by the WHO. Describes living with depression through metaphor. One of the most watched mental health videos ever.' },
+  { id: 'v9', category: 'anxiety', title: 'How to Stop Feeling Anxious About Anxiety', channel: 'TED-Ed', channelAvatar: '🔴', duration: '6:03', views: '5.8M views', thumbnail: 'https://img.youtube.com/vi/ZidGozDhOjg/hqdefault.jpg', youtubeId: 'ZidGozDhOjg', link: 'https://www.youtube.com/watch?v=ZidGozDhOjg', tag: 'Anxiety', tagColor: '#f59e0b', synopsis: 'Explains the anxiety-about-anxiety loop and introduces acceptance-based techniques from ACT therapy.' },
+  { id: 'v10', category: 'energy', title: 'The Science of Setting Goals & Motivation', channel: 'Andrew Huberman', channelAvatar: '🧠', duration: '2:03:44', views: '3.1M views', thumbnail: 'https://img.youtube.com/vi/t1F7EEGPQwo/hqdefault.jpg', youtubeId: 't1F7EEGPQwo', link: 'https://www.youtube.com/watch?v=t1F7EEGPQwo', tag: 'Focus', tagColor: '#0ea5e9', synopsis: 'The neuroscience of why most people set goals wrong. Covers visual targeting, dopamine scheduling, and the role of the amygdala.' },
 ];
 
 const pdfs = [
@@ -460,6 +460,7 @@ const BooksTab = () => {
   const [activeQuote, setActiveQuote]       = useState(0);
   const [videoCategory, setVideoCategory]   = useState('all');
   const [openArticle, setOpenArticle]       = useState<Article | null>(null);
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
 
   const filtered = activeCategory === 'all' ? articles : articles.filter(a => a.category === activeCategory);
   const filteredVideos = videoCategory === 'all' ? videos : videos.filter(v => v.category === videoCategory);
@@ -567,32 +568,55 @@ const BooksTab = () => {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
           {filteredVideos.map(video => (
-            <a key={video.id} href={video.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-              <div className="glass-card" style={{ borderRadius: 16, overflow: 'hidden', cursor: 'pointer', transition: 'transform .2s, box-shadow .2s' }} onMouseEnter={e => hov(e, true)} onMouseLeave={e => hov(e, false)}>
-                <div style={{ position: 'relative', height: 148, overflow: 'hidden' }}>
-                  <img src={video.thumbnail} alt={video.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(239,68,68,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(239,68,68,0.5)' }}>
-                      <Play style={{ width: 20, height: 20, color: '#fff', marginLeft: 2 }} />
+            <div key={video.id} className="glass-card" style={{ borderRadius: 16, overflow: 'hidden', transition: 'transform .2s, box-shadow .2s' }} onMouseEnter={e => hov(e, true)} onMouseLeave={e => hov(e, false)}>
+              {/* Video Player / Thumbnail */}
+              <div style={{ position: 'relative', paddingBottom: playingVideoId === video.id ? '56.25%' : undefined, height: playingVideoId === video.id ? 0 : 148, overflow: 'hidden' }}>
+                {playingVideoId === video.id ? (
+                  <>
+                    <iframe
+                      src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1&rel=0`}
+                      title={video.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                    />
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPlayingVideoId(null); }}
+                      style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <X style={{ width: 14, height: 14, color: '#fff' }} />
+                    </button>
+                  </>
+                ) : (
+                  <div style={{ cursor: 'pointer' }} onClick={() => setPlayingVideoId(video.id)}>
+                    <img src={video.thumbnail} alt={video.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(239,68,68,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(239,68,68,0.5)' }}>
+                        <Play style={{ width: 20, height: 20, color: '#fff', marginLeft: 2 }} />
+                      </div>
                     </div>
+                    <span style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.75)', color: '#fff', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{video.duration}</span>
+                    <span style={{ position: 'absolute', top: 10, left: 10, background: video.tagColor, color: '#fff', padding: '3px 10px', borderRadius: 999, fontSize: 10, fontWeight: 700 }}>{video.tag}</span>
                   </div>
-                  <span style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.75)', color: '#fff', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{video.duration}</span>
-                  <span style={{ position: 'absolute', top: 10, left: 10, background: video.tagColor, color: '#fff', padding: '3px 10px', borderRadius: 999, fontSize: 10, fontWeight: 700 }}>{video.tag}</span>
-                </div>
-                <div style={{ padding: '12px 14px' }}>
-                  <h4 style={{ fontWeight: 700, fontSize: 13, margin: '0 0 6px', color: 'var(--foreground)', lineHeight: 1.4 }}>{video.title}</h4>
-                  <p style={{ fontSize: 11, color: 'var(--muted-foreground)', margin: '0 0 10px', lineHeight: 1.55 }}>{video.synopsis}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 16 }}>{video.channelAvatar}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-foreground)' }}>{video.channel}</span>
-                    </div>
+                )}
+              </div>
+              <div style={{ padding: '12px 14px' }}>
+                <h4 style={{ fontWeight: 700, fontSize: 13, margin: '0 0 6px', color: 'var(--foreground)', lineHeight: 1.4 }}>{video.title}</h4>
+                <p style={{ fontSize: 11, color: 'var(--muted-foreground)', margin: '0 0 10px', lineHeight: 1.55 }}>{video.synopsis}</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 16 }}>{video.channelAvatar}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-foreground)' }}>{video.channel}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>{video.views}</span>
+                    <a href={video.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 700, color: '#ef4444', textDecoration: 'none' }}>
+                      <Youtube style={{ width: 12, height: 12 }} /> YouTube
+                    </a>
                   </div>
                 </div>
               </div>
-            </a>
+            </div>
           ))}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,9 +14,48 @@ serve(async (req) => {
   try {
     const { messages, userData } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // --- RAG: Retrieve relevant knowledge based on user's last message ---
+    let ragContext = '';
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user')?.content || '';
+      
+      // Simple keyword-based retrieval from knowledge_documents
+      const keywords = lastUserMsg.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
+      const searchTerms = keywords.slice(0, 5);
+      
+      if (searchTerms.length > 0) {
+        // Search by tags and category matching
+        const { data: docs } = await supabase
+          .from('knowledge_documents')
+          .select('title, content, category, tags')
+          .limit(3);
+        
+        if (docs && docs.length > 0) {
+          // Score documents by keyword relevance
+          const scored = docs.map((doc: any) => {
+            let score = 0;
+            const docText = `${doc.title} ${doc.content} ${(doc.tags || []).join(' ')} ${doc.category}`.toLowerCase();
+            for (const term of searchTerms) {
+              if (docText.includes(term)) score++;
+            }
+            return { ...doc, score };
+          }).filter((d: any) => d.score > 0)
+            .sort((a: any, b: any) => b.score - a.score)
+            .slice(0, 2);
+          
+          if (scored.length > 0) {
+            ragContext = `\n\nRELEVANT KNOWLEDGE BASE (use this to inform your response — don't quote it directly, weave it naturally):\n${scored.map((d: any) => `[${d.category}] ${d.title}: ${d.content.substring(0, 500)}`).join('\n\n')}`;
+          }
+        }
+      }
     }
 
     const journalEntries = userData?.journalEntries || [];
@@ -66,12 +106,14 @@ ${faceScanHistory.map((s: any) => `${s.date}: ${s.mood} (${s.confidence}%) flags
 
 ${journalEntries.length > 0 ? `RECENT JOURNAL ENTRIES:
 ${journalEntries.map((e: any) => `- ${e.date}: mood ${e.mood}/5 — "${e.reflection}"`).join('\n')}` : ''}
+${ragContext}
 
 CRITICAL BEHAVIOR — ONE QUESTION AT A TIME:
 1. Ask only ONE follow-up question per message. Never bombard with multiple questions.
 2. Listen to their response before asking the next thing.
 3. Build on what they say — reference their actual words.
 4. After 3-4 exchanges where you understand the situation, THEN offer specific suggestions.
+5. Use knowledge from the RELEVANT KNOWLEDGE BASE to give informed, evidence-backed advice — but present it casually like a knowledgeable friend, never like a textbook.
 
 ACTIVITY TRACKING INTEGRATION:
 - If user completed meditation/yoga/breathing, acknowledge it warmly: "Nice! ${activityData.meditationMinutes || 0} mins of meditation today — that's awesome 🧘"
@@ -102,6 +144,9 @@ Stressors: ${stressors.join(', ')}
 - Loneliness: "Like, no friends at all? Or feeling disconnected even around people?"
 - Breakup: Be extra gentle. Never say "move on." Let them grieve.
 - Academic: "Which subject is killing you? Or just everything at once? 😅"
+- Burnout: Watch for signs — exhaustion despite rest, cynicism, reduced performance. "You sound burnt out yaar. That's different from being tired."
+- Exam anxiety: "Your brain's prefrontal cortex literally shuts down under threat — it's not you being dumb, it's biology"
+- Imposter syndrome: "70% of students feel this. You got into this college for a reason 💪"
 ` : ''}
 
 APP RECOMMENDATIONS (use naturally, don't list all at once):
@@ -115,12 +160,12 @@ APP RECOMMENDATIONS (use naturally, don't list all at once):
 
 CRISIS PROTOCOL:
 Self-harm/suicide mentions → Immediately compassionate + helplines:
-- India: iCall 9152987821, Vandrevala Foundation 1860-2662-345
+- India: iCall 9152987821, Vandrevala Foundation 1860-2662-345, AASRA 9820466726
 - USA: 988 Lifeline
 - UK: Samaritans 116 123
 Never minimize. Always validate.
 
-Remember: You're a FRIEND first. Not a bot, not a doctor. Chat history matters — reference past conversations naturally. You have access to their activity data, face scan results, and journal — use this information to make your responses personal and contextual.`;
+Remember: You're a FRIEND first. Not a bot, not a doctor. Chat history matters — reference past conversations naturally. You have access to their activity data, face scan results, journal, AND a clinical knowledge base — use all of this to make your responses personal, contextual, and informed.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

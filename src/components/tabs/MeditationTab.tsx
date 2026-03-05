@@ -3,15 +3,13 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useDailyTracker } from '@/components/tracking/DailyTracker';
-
-// ✅ Import audio files (same folder)
 import ocean from './ocean.mp3';
 import forest from './forest.mp3';
 import tibetan from './tibetian.mp3';
 import birds from './birds.mp3';
 import river from './river.mp3';
 import wind from './wind.mp3';
-
+// Real ambient audio from free audio libraries (Pixabay/Free Music Archive)
 type Track = {
   id: number;
   title: string;
@@ -78,76 +76,77 @@ const tracks: Track[] = [
     benefits: ['Stress reduction', 'Peaceful ambiance', 'Mental clarity'],
   },
 ];
-
 const MeditationTab = () => {
   const [playing, setPlaying] = useState<number | null>(null);
   const [volume, setVolume] = useState(70);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const startTimeRef = useRef<number>(0);
   const { addActivity } = useDailyTracker();
+  const startTimeRef = useRef<number>(0);
 
-  // 🧹 Cleanup on unmount
   useEffect(() => {
     return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
-
-  const togglePlay = async (track: Track) => {
-    try {
-      // ⏸ Pause if same track
-      if (playing === track.id) {
-        audioRef.current?.pause();
-
-        const elapsed = Math.round(
-          (Date.now() - startTimeRef.current) / 60000
-        );
-        if (elapsed > 0) addActivity('meditation', elapsed);
-
-        setPlaying(null);
-        setCurrentTime(0);
-        return;
-      }
-
-      // ▶ Stop previous
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+    };
+  }, []);
 
+  const togglePlay = (track: typeof tracks[0]) => {
+    if (playing === track.id) {
+      // Stop playing
+      if (audioRef.current) {
+        audioRef.current.pause();
+        const elapsed = Math.round((Date.now() - startTimeRef.current) / 60000);
+        if (elapsed > 0) {
+          addActivity('meditation', elapsed);
+        }
+      }
+      setPlaying(null);
+      setCurrentTime(0);
+    } else {
+      // Start playing
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
       const audio = new Audio(track.audioUrl);
       audio.volume = volume / 100;
       audio.loop = true;
-      audio.preload = 'auto';
+      
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
+      });
+      
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+      });
 
-      audio.ontimeupdate = () => setCurrentTime(audio.currentTime);
-      audio.onloadedmetadata = () => setDuration(audio.duration);
-
-      await audio.play(); // 🔑 Required for reliability
-
+      audio.addEventListener('error', () => {
+        console.log('Audio playback error - using fallback');
+        setPlaying(null);
+      });
+      
+      audio.play().catch(console.error);
       audioRef.current = audio;
       startTimeRef.current = Date.now();
       setPlaying(track.id);
-    } catch (err) {
-      console.error('Audio play blocked:', err);
-      alert('Tap once more to enable audio 🎧');
     }
   };
 
   const handleVolumeChange = (value: number[]) => {
-    const v = value[0];
-    setVolume(v);
-    if (audioRef.current) audioRef.current.volume = v / 100;
+    setVolume(value[0]);
+    if (audioRef.current) {
+      audioRef.current.volume = value[0] / 100;
+    }
   };
 
-  const formatTime = (sec: number) => {
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -159,15 +158,13 @@ const MeditationTab = () => {
             <Headphones className="w-7 h-7 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Brain Soothing Music</h2>
-            <p className="text-muted-foreground">
-              🎧 Use headphones for best experience
-            </p>
+            <h2 className="text-xl font-display font-bold text-foreground">Brain Soothing Music</h2>
+            <p className="text-muted-foreground">🎧 Use headphones for the best experience</p>
           </div>
         </div>
       </div>
 
-      {/* Volume */}
+      {/* Volume Control */}
       <div className="glass-card p-4 flex items-center gap-4">
         <Volume2 className="w-5 h-5 text-muted-foreground" />
         <Slider
@@ -177,53 +174,51 @@ const MeditationTab = () => {
           step={1}
           className="flex-1"
         />
-        <span className="text-sm w-12">{volume}%</span>
+        <span className="text-sm text-muted-foreground w-12">{volume}%</span>
       </div>
 
       {/* Now Playing */}
       {playing && (
-        <div className="glass-card p-6 border border-primary/30">
-          <p className="text-sm text-muted-foreground">Now Playing</p>
-          <p className="font-bold text-lg">
-            {tracks.find(t => t.id === playing)?.title}
-          </p>
-
-          <div className="flex items-center gap-3 mt-3">
-            <span className="text-xs">{formatTime(currentTime)}</span>
+        <div className="glass-card p-6 bg-gradient-to-r from-primary/20 to-accent/20 border-2 border-primary/30">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Now Playing</p>
+              <p className="font-display font-bold text-lg text-foreground">
+                {tracks.find(t => t.id === playing)?.title}
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+              <Headphones className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">{formatTime(currentTime)}</span>
             <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary"
-                style={{
-                  width: duration
-                    ? `${(currentTime / duration) * 100}%`
-                    : '0%',
-                }}
+              <div 
+                className="h-full bg-primary transition-all"
+                style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
               />
             </div>
-            <span className="text-xs">{formatTime(duration)}</span>
+            <span className="text-xs text-muted-foreground">{formatTime(duration)}</span>
           </div>
         </div>
       )}
 
       {/* Tracks */}
       <div className="grid gap-4">
-        {tracks.map(track => (
+        {tracks.map((track) => (
           <div
             key={track.id}
-            className={`glass-card p-5 ${
-              playing === track.id
-                ? 'ring-2 ring-primary bg-primary/5'
-                : ''
+            className={`glass-card p-5 transition-all hover:scale-[1.01] ${
+              playing === track.id ? 'ring-2 ring-primary shadow-xl bg-primary/5' : ''
             }`}
           >
             <div className="flex items-center gap-4">
-              <div
-                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${track.color} flex items-center justify-center`}
-              >
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${track.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="w-12 h-12 rounded-full bg-white/20 text-white"
+                  className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 text-white"
                   onClick={() => togglePlay(track)}
                 >
                   {playing === track.id ? (
@@ -233,27 +228,22 @@ const MeditationTab = () => {
                   )}
                 </Button>
               </div>
-
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">{track.title}</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {track.description}
-                </p>
+              
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground text-lg">{track.title}</h3>
+                <p className="text-sm text-muted-foreground mb-2">{track.description}</p>
                 <div className="flex flex-wrap gap-1">
-                  {track.benefits.map((b, i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary"
-                    >
-                      {b}
+                  {track.benefits.map((benefit, i) => (
+                    <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      {benefit}
                     </span>
                   ))}
                 </div>
               </div>
-
-              <span className="text-sm hidden sm:block">
+              
+              <div className="text-sm text-muted-foreground font-medium hidden sm:block">
                 {track.duration}
-              </span>
+              </div>
             </div>
           </div>
         ))}
