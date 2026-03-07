@@ -293,10 +293,10 @@ const videos = [
 ];
 
 const pdfs = [
-  { title: 'Understanding Depression — WHO Guide', size: '2.1 MB', link: 'https://www.who.int/docs/default-source/mental-health/depression/depression-patient-health-questionnaire.pdf', color: '#6366f1' },
-  { title: 'Anxiety Workbook (Free PDF)', size: '1.4 MB', link: 'https://www.cci.health.wa.gov.au/~/media/CCI/Mental-Health-Professionals/Anxiety/Anxiety---Information-Sheets/Anxiety-Information-Sheet---01---What-is-Anxiety.pdf', color: '#f59e0b' },
-  { title: 'Grief & Loss — Coping Toolkit', size: '3.2 MB', link: 'https://www.cancer.org/content/dam/cancer-org/cancer-control/en/booklets-flyers/grief-and-bereavement.pdf', color: '#ec4899' },
-  { title: 'Mindfulness for Beginners (Jon Kabat-Zinn)', size: '890 KB', link: 'https://www.mindfulnesscds.com/media/Mindfulness_for_Beginners_excerpt.pdf', color: '#10b981' },
+  { title: 'Understanding Depression — WHO Guide', size: '2.1 MB', link: 'https://www.who.int/publications/i/item/depression-and-other-common-mental-disorders', color: '#6366f1' },
+  { title: 'Anxiety Workbook (CCI)', size: '1.4 MB', link: 'https://www.cci.health.wa.gov.au/Resources/Looking-After-Yourself/Anxiety', color: '#f59e0b' },
+  { title: 'Grief & Loss — Coping Toolkit', size: '3.2 MB', link: 'https://www.cancer.org/cancer/managing-cancer/end-of-life-care/grief-and-loss.html', color: '#ec4899' },
+  { title: 'Mindfulness for Beginners (Jon Kabat-Zinn)', size: '890 KB', link: 'https://www.mindful.org/jon-kabat-zinn-defining-mindfulness/', color: '#10b981' },
   { title: 'Dopamine Nation — Book Overview', size: '1.1 MB', link: 'https://www.penguinrandomhouse.com/books/609049/dopamine-nation-by-anna-lembke/', color: '#7c3aed' },
   { title: 'Atomic Habits — Summary & Worksheets', size: '780 KB', link: 'https://jamesclear.com/atomic-habits', color: '#f97316' },
 ];

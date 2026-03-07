@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useDailyTracker } from '@/components/tracking/DailyTracker';
+
 import ocean from './ocean.mp3';
 import forest from './forest.mp3';
 import tibetan from './tibetian.mp3';

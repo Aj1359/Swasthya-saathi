@@ -35,6 +35,12 @@ const CATEGORIES = [
   { value: 'lonely', label: 'Lonely', icon: '💙' },
   { value: 'wins', label: 'Wins', icon: '🎉' },
   { value: 'advice', label: 'Advice', icon: '💡' },
+  { value: 'addiction', label: 'Addiction', icon: '🔗' },
+  { value: 'sexuality', label: 'Sexuality', icon: '🌈' },
+  { value: 'abuse', label: 'Abuse & Trauma', icon: '🛡️' },
+  { value: 'self-harm', label: 'Self-Harm', icon: '🆘' },
+  { value: 'body-image', label: 'Body Image', icon: '🪞' },
+  { value: 'grief', label: 'Grief & Loss', icon: '🕊️' },
 ];
 
 const RANDOM_ALIASES = [

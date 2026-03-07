@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, ExternalLink, Flower2, Play, Check, Timer } from 'lucide-react';
+import { ChevronDown, ChevronUp, Flower2, Play, Check, Timer, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useDailyTracker } from '@/components/tracking/DailyTracker';
 import { useUser } from '@/contexts/UserContext';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 const yogaCategories = [
   {
@@ -12,8 +14,9 @@ const yogaCategories = [
     icon: '🩺',
     poses: [
       { 
-        name: 'Surya Namaskar', 
-        video: 'https://www.youtube.com/watch?v=AbPufvvYiSw', 
+        name: 'Surya Namaskar (Sun Salutation)', 
+        youtubeId: 'AbPufvvYiSw',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
         steps: ['Stand straight with feet together', 'Raise arms overhead while inhaling', 'Bend forward touching the floor', 'Complete the 12-step sequence'],
         duration: 30,
@@ -21,15 +24,17 @@ const yogaCategories = [
       },
       { 
         name: 'Dhanurasana (Bow Pose)', 
-        video: 'https://www.youtube.com/watch?v=Nuk94YJTKOQ', 
+        youtubeId: 'Nuk94YJTKOQ',
+        channel: 'Ventuno Yoga',
         image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=300&fit=crop',
         steps: ['Lie on stomach', 'Bend knees and hold ankles', 'Lift chest and thighs off the floor', 'Hold for 15-20 seconds'],
         duration: 30,
         healthBoost: 4
       },
       { 
-        name: 'Paschimottanasana', 
-        video: 'https://www.youtube.com/watch?v=4Ejz7IgODlU', 
+        name: 'Paschimottanasana (Seated Forward Bend)', 
+        youtubeId: '4Ejz7IgODlU',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=400&h=300&fit=crop',
         steps: ['Sit with legs extended', 'Inhale and raise arms', 'Exhale and bend forward', 'Hold your toes and breathe'],
         duration: 30,
@@ -44,23 +49,26 @@ const yogaCategories = [
     poses: [
       { 
         name: 'Shavasana (Corpse Pose)', 
-        video: 'https://www.youtube.com/watch?v=1VYlOKUdylM', 
+        youtubeId: '1VYlOKUdylM',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1552196563-55cd4e45efb3?w=400&h=300&fit=crop',
         steps: ['Lie flat on your back', 'Keep arms by sides, palms up', 'Close eyes and relax completely', 'Focus on deep breathing for 10 min'],
         duration: 30,
         healthBoost: 5
       },
       { 
-        name: 'Sukhasana', 
-        video: 'https://www.youtube.com/watch?v=u4tPNWSrpNg', 
+        name: 'Sukhasana (Easy Pose)', 
+        youtubeId: 'u4tPNWSrpNg',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1593811167562-9cef47bfc4d7?w=400&h=300&fit=crop',
         steps: ['Sit cross-legged', 'Keep spine straight', 'Rest hands on knees', 'Breathe deeply and meditate'],
         duration: 30,
         healthBoost: 4
       },
       { 
-        name: 'Viparita Karani', 
-        video: 'https://www.youtube.com/watch?v=ZqjPmNmqxHE', 
+        name: 'Viparita Karani (Legs Up The Wall)', 
+        youtubeId: 'ZqjPmNmqxHE',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?w=400&h=300&fit=crop',
         steps: ['Lie near a wall', 'Raise legs up against the wall', 'Keep arms relaxed at sides', 'Stay for 5-10 minutes'],
         duration: 30,
@@ -74,24 +82,27 @@ const yogaCategories = [
     icon: '🧘',
     poses: [
       { 
-        name: 'Balasana (Child Pose)', 
-        video: 'https://www.youtube.com/watch?v=2MJGg-dUKh0', 
+        name: 'Balasana (Child\'s Pose)', 
+        youtubeId: '2MJGg-dUKh0',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
         steps: ['Kneel on the floor', 'Sit back on heels', 'Bend forward, arms extended', 'Rest forehead on ground, breathe'],
         duration: 30,
         healthBoost: 5
       },
       { 
-        name: 'Uttanasana', 
-        video: 'https://www.youtube.com/watch?v=6bQMnO0IfTA', 
+        name: 'Uttanasana (Standing Forward Bend)', 
+        youtubeId: '6bQMnO0IfTA',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1573590330099-d6c7355ec595?w=400&h=300&fit=crop',
         steps: ['Stand with feet hip-width apart', 'Bend forward from hips', 'Let head hang heavy', 'Hold ankles or touch floor'],
         duration: 30,
         healthBoost: 4
       },
       { 
-        name: 'Cat-Cow Stretch', 
-        video: 'https://www.youtube.com/watch?v=kqnua4rHVVA', 
+        name: 'Marjariasana-Bitilasana (Cat-Cow)', 
+        youtubeId: 'kqnua4rHVVA',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&h=300&fit=crop',
         steps: ['Start on hands and knees', 'Inhale, arch back (cow)', 'Exhale, round spine (cat)', 'Repeat 10-15 times'],
         duration: 30,
@@ -105,24 +116,27 @@ const yogaCategories = [
     icon: '🦴',
     poses: [
       { 
-        name: 'Bhujangasana (Cobra)', 
-        video: 'https://www.youtube.com/watch?v=fOdrW7nf-YY', 
+        name: 'Bhujangasana (Cobra Pose)', 
+        youtubeId: 'fOdrW7nf-YY',
+        channel: 'Ventuno Yoga',
         image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
         steps: ['Lie face down', 'Place palms under shoulders', 'Inhale and lift chest', 'Keep elbows slightly bent'],
         duration: 30,
         healthBoost: 5
       },
       { 
-        name: 'Marjaryasana', 
-        video: 'https://www.youtube.com/watch?v=kqnua4rHVVA', 
+        name: 'Marjaryasana (Cat Pose)', 
+        youtubeId: 'kqnua4rHVVA',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=300&fit=crop',
         steps: ['Start on all fours', 'Round your back upward', 'Tuck chin to chest', 'Hold for a few breaths'],
         duration: 30,
         healthBoost: 4
       },
       { 
-        name: 'Setu Bandhasana (Bridge)', 
-        video: 'https://www.youtube.com/watch?v=SVz8_IrGvl0', 
+        name: 'Setu Bandhasana (Bridge Pose)', 
+        youtubeId: 'SVz8_IrGvl0',
+        channel: 'Yoga With Adriene',
         image: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=400&h=300&fit=crop',
         steps: ['Lie on back, knees bent', 'Lift hips toward ceiling', 'Clasp hands under body', 'Hold for 30 seconds'],
         duration: 30,
@@ -138,6 +152,7 @@ const YogaTab = () => {
   const [tryingAsana, setTryingAsana] = useState<string | null>(null);
   const [asanaTimer, setAsanaTimer] = useState(30);
   const [asanaComplete, setAsanaComplete] = useState<string[]>([]);
+  const [videoOpen, setVideoOpen] = useState<{ name: string; youtubeId: string; channel: string } | null>(null);
   const { addActivity } = useDailyTracker();
   const { updateIndices, userData } = useUser();
 
@@ -153,7 +168,6 @@ const YogaTab = () => {
           setAsanaComplete(prev => [...prev, poseName]);
           addActivity('yoga', 1);
           
-          // Boost health index
           if (userData) {
             const newHealth = Math.min(userData.healthIndex + 3, 100);
             updateIndices(userData.happinessIndex, newHealth);
@@ -167,6 +181,30 @@ const YogaTab = () => {
 
   return (
     <div className="space-y-4 animate-fade-in">
+      {/* Video Dialog */}
+      <Dialog open={!!videoOpen} onOpenChange={(open) => !open && setVideoOpen(null)}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden bg-black border-border/50">
+          <VisuallyHidden.Root><DialogTitle>{videoOpen?.name}</DialogTitle></VisuallyHidden.Root>
+          <div className="p-3 bg-muted/20 border-b border-border/30 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">{videoOpen?.name}</p>
+              <p className="text-xs text-muted-foreground">{videoOpen?.channel}</p>
+            </div>
+          </div>
+          <AspectRatio ratio={16/9}>
+            {videoOpen && (
+              <iframe
+                src={`https://www.youtube.com/embed/${videoOpen.youtubeId}?autoplay=1&rel=0`}
+                title={videoOpen.name}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            )}
+          </AspectRatio>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="glass-card p-6 bg-gradient-to-r from-sage/20 to-primary/10">
         <div className="flex items-center gap-4">
@@ -175,7 +213,7 @@ const YogaTab = () => {
           </div>
           <div>
             <h2 className="text-xl font-display font-bold text-foreground">Yoga for Wellness</h2>
-            <p className="text-muted-foreground">Poses sorted by health conditions • Try asanas to boost health!</p>
+            <p className="text-muted-foreground">Poses sorted by health conditions • Watch tutorials in-app!</p>
           </div>
         </div>
       </div>
@@ -263,9 +301,9 @@ const YogaTab = () => {
                         <Button
                           variant="outline"
                           className="flex-1"
-                          onClick={() => window.open(pose.video, '_blank')}
+                          onClick={() => setVideoOpen({ name: pose.name, youtubeId: pose.youtubeId, channel: pose.channel })}
                         >
-                          <ExternalLink className="w-4 h-4 mr-2" />
+                          <Play className="w-4 h-4 mr-2" />
                           Watch Tutorial
                         </Button>
                         <Button
