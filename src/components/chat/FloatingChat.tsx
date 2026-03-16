@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Send, X, MessageCircle, Mic, MicOff, Volume2, VolumeX, Loader2, Sparkles, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,7 @@ const getSessionId = () => {
 const FloatingChat = () => {
   const { userData, updateIndices } = useUser();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -37,6 +39,18 @@ const FloatingChat = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const sessionId = useRef(getSessionId());
+
+  // Open chat if navigated with ?chat=SESSION_ID
+  useEffect(() => {
+    const chatParam = searchParams.get('chat');
+    if (chatParam) {
+      sessionId.current = chatParam;
+      localStorage.setItem('swasthyasaathi_session_id', chatParam);
+      setHistoryLoaded(false);
+      setIsOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isOpen && !historyLoaded) {

@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider } from "@/contexts/UserContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { Analytics } from "@vercel/analytics/react";
 import Landing from "./pages/Landing";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
@@ -29,7 +28,6 @@ const App = () => (
         <UserProvider>
           <Toaster />
           <Sonner />
-          <Analytics />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Landing />} />

@@ -1,363 +1,155 @@
 # 🏗️ SwasthyaSaathi Architecture
 
-This document provides a detailed overview of the SwasthyaSaathi application architecture.
-
 ## 📐 System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         CLIENT (Browser)                             │
 ├─────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   Landing   │  │  Onboarding │  │  Dashboard  │  │  NotFound   │ │
-│  │    Page     │  │    Flow     │  │    (Main)   │  │    Page     │ │
-│  └─────────────┘  └─────────────┘  └──────┬──────┘  └─────────────┘ │
-│                                           │                          │
-│  ┌────────────────────────────────────────┴───────────────────────┐ │
-│  │                      Dashboard Components                       │ │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐  │ │
-│  │  │Happiness │ │ Health   │ │ Wellness │ │   Suggestions    │  │ │
-│  │  │  Card    │ │  Card    │ │  Chart   │ │     Card         │  │ │
-│  │  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘  │ │
-│  └────────────────────────────────────────────────────────────────┘ │
+│  Pages:                                                              │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│  │ Landing  │ │   Auth   │ │Onboarding│ │Dashboard │ │ History  │ │
+│  └──────────┘ └──────────┘ └──────────┘ └────┬─────┘ └──────────┘ │
+│                                               │                      │
+│  Dashboard Components:                        │                      │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────┴─────┐              │
+│  │Happiness │ │ Health   │ │ Wellness │ │ Crisis   │              │
+│  │  Card    │ │  Card    │ │  Chart   │ │ Support  │              │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘              │
 │                                                                      │
-│  ┌────────────────────────────────────────────────────────────────┐ │
-│  │                        Feature Tabs                             │ │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │ │
-│  │  │Meditation│ │   Yoga   │ │Breathing │ │  Books   │          │ │
-│  │  │   Tab    │ │   Tab    │ │   Tab    │ │   Tab    │          │ │
-│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘          │ │
-│  └────────────────────────────────────────────────────────────────┘ │
+│  Feature Tabs:                                                       │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐              │
+│  │Meditation│ │Yoga+Video│ │Breathing │ │Books/PDF │              │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘              │
 │                                                                      │
-│  ┌────────────────────────────────────────────────────────────────┐ │
-│  │                     Floating Components                         │ │
-│  │  ┌──────────────┐  ┌──────────────┐                            │ │
-│  │  │ Daily Tracker│  │ Ruhi Chat    │                            │ │
-│  │  │   Modal      │  │  (Floating)  │                            │ │
-│  │  └──────────────┘  └──────────────┘                            │ │
-│  └────────────────────────────────────────────────────────────────┘ │
+│  Floating: Daily Tracker | Ruhi Chat | Profile Menu                  │
+│  Special: Face Mood Reader | Mood Journal | Peer Support | Student   │
 └─────────────────────────────────────────────────────────────────────┘
                                    │
                                    ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         BACKEND (Supabase)                           │
+│                       BACKEND (Lovable Cloud)                        │
 ├─────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │                    Edge Functions                            │   │
-│  │  ┌─────────────────────────────────────────────────────┐    │   │
-│  │  │  ruhi-chat                                           │    │   │
-│  │  │  - Handles AI conversation                           │    │   │
-│  │  │  - Streams responses via SSE                         │    │   │
-│  │  │  - Personalizes based on user data                   │    │   │
-│  │  └─────────────────────────────────────────────────────┘    │   │
-│  └─────────────────────────────────────────────────────────────┘   │
+│  Edge Functions:                                                     │
+│  ┌──────────────────┐  ┌──────────────────┐                        │
+│  │  ruhi-chat        │  │  face-mood        │                        │
+│  │  AI conversation  │  │  Facial analysis  │                        │
+│  │  SSE streaming    │  │  Mood detection   │                        │
+│  └──────────────────┘  └──────────────────┘                        │
+│                                                                      │
+│  Database (PostgreSQL + RLS):                                        │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐      │
+│  │  profiles   │ │chat_messages│ │face_scans  │ │activity_logs│      │
+│  │  journal_   │ │peer_posts  │ │peer_replies│ │knowledge_  │      │
+│  │  entries    │ │            │ │            │ │documents   │      │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘      │
+│                                                                      │
+│  Auth: Email/password with session management                        │
 └─────────────────────────────────────────────────────────────────────┘
                                    │
                                    ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      EXTERNAL SERVICES                               │
-├─────────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐     │
-│  │  Lovable AI     │  │    Pixabay      │  │    Unsplash     │     │
-│  │  Gateway        │  │  (Audio CDN)    │  │  (Image CDN)    │     │
-│  │  (Gemini API)   │  │                 │  │                 │     │
+│  │  AI Gateway     │  │    Pixabay      │  │   YouTube       │     │
+│  │  (Gemini API)   │  │  (Audio CDN)    │  │ (Yoga Videos)   │     │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🧩 Component Architecture
-
-### Core Components
+## 🧩 Component Tree
 
 ```
 src/
 ├── components/
-│   ├── chat/
-│   │   └── FloatingChat.tsx      # AI chatbot with streaming
-│   │
+│   ├── chat/FloatingChat.tsx          # AI chatbot, streaming, voice, history continuation
+│   ├── community/PeerSupport.tsx      # Anonymous peer support + taboo topics
+│   ├── crisis/CrisisSupport.tsx       # Location-aware crisis resources + live news feed
 │   ├── dashboard/
-│   │   ├── HappinessCard.tsx     # Happiness index display
-│   │   ├── HealthCard.tsx        # Health index display
-│   │   ├── WellnessChart.tsx     # Weekly/monthly trends
-│   │   └── DashboardSuggestions.tsx  # Personalized tips
-│   │
+│   │   ├── HappinessCard.tsx          # Happiness index display
+│   │   ├── HealthCard.tsx             # Health index display
+│   │   ├── WellnessChart.tsx          # Weekly/monthly trends
+│   │   ├── DashboardSuggestions.tsx   # Personalized tips
+│   │   ├── MotivationQuote.tsx        # Daily motivation
+│   │   └── WeeklyReport.tsx           # Weekly summary
+│   ├── journal/MoodJournal.tsx        # Reflective journaling
+│   ├── mood/FaceMoodReader.tsx        # AI facial analysis
+│   ├── profile/ProfileMenu.tsx        # User menu + history link
+│   ├── student/StudentMode.tsx        # Student-specific features
 │   ├── tabs/
-│   │   ├── MeditationTab.tsx     # Audio player & tracks
-│   │   ├── YogaTab.tsx           # Poses & Try Asana
-│   │   ├── BreathingTab.tsx      # Breathing exercises
-│   │   └── BooksTab.tsx          # Reading recommendations
-│   │
-│   ├── tracking/
-│   │   └── DailyTracker.tsx      # Water, sleep, mood logging
-│   │
-│   └── ui/                       # shadcn/ui components
-│       ├── button.tsx
-│       ├── card.tsx
-│       ├── dialog.tsx
-│       ├── progress.tsx
-│       ├── slider.tsx
-│       ├── tabs.tsx
-│       └── ...
+│   │   ├── MeditationTab.tsx          # Audio player (CDN tracks)
+│   │   ├── YogaTab.tsx                # Poses + in-app video popup
+│   │   ├── BreathingTab.tsx           # Visual breathing guides
+│   │   └── BooksTab.tsx               # PDFs & articles
+│   ├── tracking/DailyTracker.tsx      # Water, sleep, mood logging
+│   └── ui/                            # shadcn/ui components
+├── contexts/
+│   ├── AuthContext.tsx                 # Auth state + sign in/up/out
+│   └── UserContext.tsx                 # User profile + indices
+├── pages/
+│   ├── Landing.tsx                     # Public landing page
+│   ├── Auth.tsx                        # Login → dashboard, Signup → onboarding
+│   ├── Onboarding.tsx                  # Profile setup flow
+│   ├── Dashboard.tsx                   # Main app (protected)
+│   └── History.tsx                     # Clickable chat/scan/activity history
+└── integrations/supabase/             # Auto-generated client + types
 ```
 
-### State Management
+## 🔄 Key Data Flows
 
+### Authentication Flow
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      UserContext                             │
-├─────────────────────────────────────────────────────────────┤
-│  userData: {                                                 │
-│    name: string                                              │
-│    gender: string                                            │
-│    age: number                                               │
-│    mood: string                                              │
-│    aboutYourself: string                                     │
-│    happinessIndex: number (0-100)                           │
-│    healthIndex: number (0-100)                              │
-│  }                                                           │
-├─────────────────────────────────────────────────────────────┤
-│  Methods:                                                    │
-│  - setUserData(data)                                         │
-│  - updateIndices(happiness, health)                          │
-│  - isOnboarded: boolean                                      │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    localStorage Keys                         │
-├─────────────────────────────────────────────────────────────┤
-│  swasthyasaathi_user          → User profile data           │
-│  swasthyasaathi_daily_YYYY-MM-DD → Daily activity logs      │
-└─────────────────────────────────────────────────────────────┘
+Sign Up → Onboarding → Dashboard
+Log In  → Dashboard (directly)
 ```
 
-## 🔄 Data Flow
-
-### User Onboarding Flow
-
+### Chat History Continuation
 ```
-Landing Page
-     │
-     ▼
-┌─────────────┐
-│ Start Button│
-└─────────────┘
-     │
-     ▼
-Onboarding (4 Steps)
-     │
-     ├── Step 1: Name & Gender
-     ├── Step 2: Age
-     ├── Step 3: Current Mood
-     └── Step 4: About Yourself
-     │
-     ▼
-┌─────────────────────────────┐
-│ Calculate Initial Indices   │
-│ - Happiness: based on mood  │
-│ - Health: based on age      │
-└─────────────────────────────┘
-     │
-     ▼
-Save to UserContext + localStorage
-     │
-     ▼
-Navigate to Dashboard
+History Page → Click chat session → navigate('/dashboard?chat=SESSION_ID')
+  → FloatingChat reads ?chat param → loads session → opens chat → user continues
 ```
 
-### Activity Tracking Flow
-
+### Crisis Support Flow
 ```
-User Action (e.g., meditation)
-     │
-     ▼
-┌─────────────────────────────┐
-│  Component tracks duration  │
-│  (useState for timer)       │
-└─────────────────────────────┘
-     │
-     ▼
-┌─────────────────────────────┐
-│  Update localStorage with   │
-│  daily activity data        │
-└─────────────────────────────┘
-     │
-     ▼
-┌─────────────────────────────┐
-│  Recalculate indices        │
-│  updateIndices(h, w)        │
-└─────────────────────────────┘
-     │
-     ▼
-UI Updates (Cards, Charts)
+User profile.country → Match GLOBAL_CRISES[country]
+  → Display local crises + global issues
+  → Live news feed with 10+ current global events
+  → Helplines, coping tips, articles
 ```
 
-### AI Chat Flow
-
+### Activity → Index Updates
 ```
-User Message
-     │
-     ▼
-┌─────────────────────────────┐
-│  FloatingChat Component     │
-│  - Collects user data       │
-│  - Fetches activity data    │
-└─────────────────────────────┘
-     │
-     ▼
-POST /functions/v1/ruhi-chat
-     │
-     Body: {
-       messages: [...],
-       userData: {
-         ...profile,
-         activityData: {...}
-       }
-     }
-     │
-     ▼
-┌─────────────────────────────┐
-│  Edge Function              │
-│  - Builds system prompt     │
-│  - Calls Lovable AI Gateway │
-│  - Streams response (SSE)   │
-└─────────────────────────────┘
-     │
-     ▼
-Stream chunks to UI
-     │
-     ▼
-Render with react-markdown
+User activity (meditation, yoga, etc.)
+  → Log to activity_logs table
+  → Recalculate happiness/health indices
+  → Update profiles table
+  → UI reflects new indices
 ```
 
-## 🎨 Design System
+## 🔐 Security
 
-### Color Palette
+- Row-Level Security (RLS) on all user tables
+- Email/password auth with session persistence
+- JWT validation on edge functions
+- No sensitive data in client-side storage
+- CORS configured on all edge functions
 
-```css
-:root {
-  /* Primary - Sage Green */
-  --primary: 142 35% 55%;
-  
-  /* Secondary - Soft Lavender */
-  --secondary: 270 20% 85%;
-  
-  /* Accent - Warm Peach */
-  --accent: 25 70% 75%;
-  
-  /* Background */
-  --background: 120 15% 97%;
-  
-  /* Foreground */
-  --foreground: 142 20% 20%;
-}
-```
-
-### Typography
-
-```
-Font Family: 'Nunito', sans-serif
-Headings: 'Playfair Display', serif
-
-Scale:
-- h1: 2.5rem (40px)
-- h2: 2rem (32px)
-- h3: 1.5rem (24px)
-- body: 1rem (16px)
-- small: 0.875rem (14px)
-```
-
-### Animation Classes
-
-```css
-.animate-fade-in      /* Fade in from opacity 0 */
-.animate-scale-in     /* Scale from 95% to 100% */
-.animate-breathe      /* Breathing animation for exercises */
-.animate-pulse-gentle /* Subtle pulse for active states */
-```
-
-## 🔐 Security Considerations
-
-### Client-Side
-- User data stored in localStorage (client-only)
-- No sensitive data transmitted
-- API keys stored in environment variables
-
-### Server-Side (Edge Functions)
-- CORS headers configured
-- JWT verification disabled (public endpoint)
-- Rate limiting handled by Lovable AI Gateway
-- No database access required
-
-## 📦 Dependencies
-
-### Production Dependencies
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| react | ^18.3.1 | UI framework |
-| react-router-dom | ^6.30.1 | Routing |
-| @tanstack/react-query | ^5.83.0 | Data fetching |
-| recharts | ^2.15.4 | Charts |
-| react-markdown | ^10.1.0 | Markdown rendering |
-| lucide-react | ^0.462.0 | Icons |
-| tailwindcss | ^3.4.x | Styling |
-| @supabase/supabase-js | ^2.95.1 | Backend client |
-
-### Development Dependencies
+## 📦 Key Dependencies
 
 | Package | Purpose |
 |---------|---------|
-| vite | Build tool |
-| typescript | Type checking |
-| vitest | Testing |
-| eslint | Linting |
+| react 18 | UI framework |
+| react-router-dom 6 | Routing + search params |
+| @tanstack/react-query | Data fetching |
+| recharts | Charts & visualization |
+| react-markdown | Markdown rendering |
+| lucide-react | Icons |
+| @supabase/supabase-js | Backend client |
 
-## 🚀 Deployment
+## 👨‍💻 Author
 
-### Build Process
-
-```bash
-npm run build
-# Output: dist/
-```
-
-### Environment Requirements
-
-```
-VITE_SUPABASE_URL        # Supabase project URL
-VITE_SUPABASE_PUBLISHABLE_KEY  # Supabase anon key
-LOVABLE_API_KEY          # AI Gateway key (Edge Function secret)
-```
-
-### Edge Function Deployment
-
-Edge functions are automatically deployed via Lovable Cloud when code is pushed.
-
-```
-supabase/functions/
-└── ruhi-chat/
-    └── index.ts    # Auto-deployed
-```
-
-## 📈 Performance Optimizations
-
-1. **Code Splitting** - React Router lazy loading (future enhancement)
-2. **Audio Streaming** - External CDN for meditation tracks
-3. **Image Optimization** - External CDN for yoga images
-4. **LocalStorage** - Client-side persistence (no database round-trips)
-5. **Streaming AI** - SSE for real-time chat responses
-
-## 🔮 Future Enhancements
-
-- [ ] User authentication & cloud sync
-- [ ] Push notifications for reminders
-- [ ] Social features (community support)
-- [ ] Offline mode with service workers
-- [ ] Multi-language support
-- [ ] Voice-guided meditation
-- [ ] Wearable device integration
+**Aditya Jha**
 
 ---
 
-*Architecture Document v1.0 - SwasthyaSaathi*
+*Architecture Document v2.0 — SwasthyaSaathi*

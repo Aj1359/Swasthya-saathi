@@ -1,212 +1,147 @@
-# 🧘 SwasthyaSaathi 1.0  
-### Your AI-Powered Mental Wellness Companion  
+# 🧘 SwasthyaSaathi 2.0
 
-SwasthyaSaathi (स्वास्थ्यसाथी — *Health Companion* in Hindi) is a holistic mental wellness web application designed to help users manage stress, anxiety, and overall well-being through guided meditation, yoga, breathing exercises, wellness tracking, and an empathetic AI companion named **Ruhi**.
+> Your AI-Powered Mental Wellness Companion
 
----
+[![React](https://img.shields.io/badge/React-18.3-61dafb)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178c6)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8)](https://tailwindcss.com)
+
+SwasthyaSaathi (स्वास्थ्यसाथी — "Health Companion" in Hindi) is a holistic mental wellness application designed to help users manage stress, anxiety, and depression through guided meditation, yoga, breathing exercises, crisis awareness, and an empathetic AI companion named **Ruhi**.
+
+![SwasthyaSaathi Dashboard](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop)
 
 ## ✨ Features
 
-### 🎯 Core Wellness Features
-- **🧘 Guided Meditation**  
-  Curated ambient audio tracks (Ocean Waves, Forest Rain, Tibetan Bowls, etc.) with real-time duration tracking.
+### 🎯 Core Features
 
-- **🧎 Yoga Poses**  
-  Category-based yoga postures for diabetes, hypertension, stress, anxiety, and back pain with step-by-step guidance.
+- **🧘 Guided Meditation** — Curated ambient music (Ocean Waves, Forest Rain, Tibetan Bowls) with duration tracking
+- **🧎 Yoga Poses** — Category-based yoga with in-app video tutorials (popup player)
+- **🌬️ Breathing Exercises** — Anulom Vilom, 4-7-8, Box Breathing with visual guides
+- **📚 Books & Articles** — Curated wellness resources with valid external links
+- **💬 Ruhi AI Companion** — Empathetic AI chatbot with streaming responses, voice I/O, and chat history continuation
+- **🛡️ Crisis Support** — Location-aware crisis resources covering 15+ countries with live global crisis news feed
 
-- **🌬️ Breathing Exercises**  
-  Anulom Vilom, 4-7-8 technique, Box Breathing, and Energizing Breath with visual cues and animations.
+### 📊 Tracking & Analytics
 
-- **📚 Books & Health Facts**  
-  Inspirational wellness book recommendations and interesting health facts.
+- **Daily Wellness Tracker** — Log water intake, sleep hours, mood, and exercise
+- **Happiness & Health Index** — Dynamic indices updated by activities
+- **Weekly/Monthly Charts** — Visualize wellness trends with Recharts
+- **Personalized Suggestions** — AI-powered recommendations based on activity data
+- **Mood Journal** — Reflective journaling with mood tracking
+- **Face Mood Reader** — AI-powered facial expression analysis
 
-- **💬 Ruhi — AI Wellness Companion**  
-  An empathetic AI chatbot that provides personalized mental-wellness guidance and emotional support.
+### 🌍 Crisis & Global Awareness
 
----
+- **15+ Countries** — India, USA, UK, Ukraine, Palestine, Sudan, Myanmar, Germany, Brazil, Nigeria, China, Japan, Australia, Canada, South Korea, Afghanistan, Syria, Turkey
+- **Live Crisis News Feed** — Real-time updates on wars, economic crises, climate disasters, and political instability
+- **Local Helplines** — Country-specific emergency and mental health support numbers
+- **Coping Strategies** — Expert-backed tips for each crisis type
+- **Global Issues** — Climate anxiety, post-pandemic mental health, AI job displacement
 
-## 📊 Tracking & Analytics
-- **Daily Wellness Tracker**  
-  Log water intake, sleep hours, mood, meditation, and exercise.
+### 🎨 User Experience
 
-- **Happiness & Health Index**  
-  Dynamic indices (0–100) calculated from daily habits and activities.
-
-- **Weekly / Monthly Charts**  
-  Visualize wellness trends and personal progress.
-
-- **Personalized Suggestions**  
-  AI-powered recommendations based on activity patterns.
-
----
-
-## 🎨 User Experience
-- **Calming UI** with soft sage-green palette and gentle animations  
-- **Fully Responsive** — optimized for desktop and mobile  
-- **Personalized Onboarding** based on age, mood, and preferences  
-- **Floating Chat Interface** for instant access to Ruhi anywhere in the app  
-
----
-
-## 🧠 Ruhi AI Companion
-## 🌸 Why “Ruhi”?
-
-The name **Ruhi** comes from the word *“Ruh”*, which means **soul**.
-
-Mental wellness is deeply personal — it’s not just about habits, data, or scores, but about how a person *feels* on the inside. Ruhi represents the gentle inner voice that listens without judgment, understands emotions, and offers support with compassion.
-
-Rather than acting like a clinical assistant or command-based chatbot, **Ruhi is designed to feel like a caring presence — a companion that speaks to the soul**.
-
-Ruhi is an empathetic AI wellness assistant that:
-- Uses a warm, non-judgmental tone with gentle Hindi phrases  
-- Understands user mood, habits, and wellness data  
-- Suggests relevant meditation tracks, yoga poses, and breathing exercises  
-- Offers crisis-support guidance when needed  
-- Celebrates wellness milestones and positive habits  
-
-### Personality Traits
-- 💚 Empathetic and supportive  
-- 🙏 Gentle Hindi warmth (“aapka”, “bilkul”, “shanti se”)  
-- ✨ Validates emotions before giving suggestions  
-- 🧘 Deeply aware of all app features  
-
----
-
-## 📊 Wellness Indices
-
-### Happiness Index
-Calculated using:
-- Daily mood logging (1–5 scale)
-- Meditation duration
-- Breathing exercises completed
-
-### Health Index
-Calculated using:
-- Water intake (8-glass goal)
-- Sleep duration (7–9 hours optimal)
-- Yoga practice
-- Breathing exercises
-
----
-
-## 🏥 Yoga Health Categories
-
-| Category | Target Conditions | Key Poses |
-|--------|------------------|-----------|
-| **Diabetes Management** | Blood sugar control | Surya Namaskar, Dhanurasana |
-| **Hypertension Control** | Blood pressure | Shavasana, Viparita Karani |
-| **Stress & Anxiety** | Mental wellness | Balasana, Cat-Cow Stretch |
-| **Back Pain Relief** | Spinal health | Bhujangasana, Setu Bandhasana |
-
----
-
-## 🛠️ Tech Stack
-
-| Category | Technology |
-|--------|------------|
-| **Frontend** | React 18, TypeScript, Vite |
-| **Styling** | Tailwind CSS, shadcn/ui |
-| **State Management** | React Context, TanStack Query |
-| **Charts** | Recharts |
-| **Backend** | Supabase Edge Functions |
-| **AI** | Google Gemini API |
-| **Routing** | React Router v6 |
-
----
-
-## 📁 Project Structure
-
-swasthyasaathi/
-├── src/
-│ ├── components/
-│ │ ├── chat/ # Ruhi AI chatbot
-│ │ ├── dashboard/ # Dashboard cards & charts
-│ │ ├── tabs/ # Meditation, Yoga, Breathing, Books
-│ │ ├── tracking/ # Daily wellness tracker
-│ │ └── ui/ # Reusable UI components
-│ ├── contexts/ # React Context providers
-│ ├── hooks/ # Custom hooks
-│ ├── integrations/ # Supabase configuration
-│ ├── lib/ # Utility functions
-│ └── pages/ # Route pages
-├── supabase/
-│ └── functions/ # AI edge functions
-└── public/ # Static assets
-
-
----
+- **Calming UI** — Sage green palette with gentle animations
+- **Dark/Light Mode** — Full theme support
+- **Responsive Design** — Optimized for mobile and desktop
+- **Personalized Onboarding** — Customized experience based on profile
+- **Chat History** — Click any past chat session to continue the conversation
+- **Community Support** — Anonymous peer support with sensitive topic categories
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or bun
 
 ### Installation
+
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/swasthyasaathi.git
-
-# Navigate to project directory
-cd swasthyasaathi
-
-# Install dependencies
+git clone https://github.com/Aj1359/Swasthya-saathi.git
+cd Swasthya-saathi
 npm install
-
-# Start development server
 npm run dev
+```
 
-🔐 Environment Variables
+The app will be available at `http://localhost:8080`
 
-Create a .env file in the root directory:
+## 🛠️ Tech Stack
 
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-🔧 Development Scripts
-npm run dev       # Start development server
-npm run build     # Build for production
-npm run lint      # Run linting
-npm run test      # Run tests
+| Category | Technology |
+|----------|------------|
+| **Frontend** | React 18, TypeScript, Vite |
+| **Styling** | Tailwind CSS, shadcn/ui |
+| **State** | React Context, TanStack Query |
+| **Charts** | Recharts |
+| **Backend** | Edge Functions (Lovable Cloud) |
+| **AI** | Google Gemini via AI Gateway |
+| **Auth** | Email/password authentication |
+| **Database** | PostgreSQL with RLS policies |
+| **Routing** | React Router v6 |
 
-🤝 Contributing
+## 🎯 App Flow
 
-Fork the repository
+```
+Landing → Sign Up → Onboarding → Dashboard
+Landing → Log In → Dashboard (directly)
+                      ├── Daily Tracker
+                      ├── Wellness Charts
+                      ├── Crisis Support (location-aware)
+                      ├── Meditation Tab (audio player)
+                      ├── Yoga Tab (in-app video popup)
+                      ├── Breathing Tab
+                      ├── Books Tab
+                      ├── Mood Journal
+                      ├── Face Mood Scanner
+                      ├── Community (Peer Support)
+                      ├── History (clickable chat sessions)
+                      └── Ruhi Chat (Floating, continuable)
+```
 
-Create your feature branch
+## 🤖 Ruhi AI Companion
 
-git checkout -b feature/YourFeature
+- Uses warm, caring tone with occasional Hindi phrases
+- Provides personalized recommendations based on activity data
+- Streams responses in real-time via SSE
+- Supports voice input (Speech Recognition) and voice output (TTS)
+- Chat sessions persist and can be continued from History
 
+## 🏥 Health Categories (Yoga)
 
-Commit your changes
+| Category | Target | Key Poses |
+|----------|--------|-----------|
+| **Diabetes** | Blood sugar control | Surya Namaskar, Dhanurasana |
+| **Hypertension** | Blood pressure | Shavasana, Viparita Karani |
+| **Stress & Anxiety** | Mental wellness | Balasana, Cat-Cow Stretch |
+| **Back Pain** | Spinal health | Bhujangasana, Setu Bandhasana |
 
-git commit -m "Add your feature"
+## 🔧 Development
 
+```bash
+npm run dev      # Start dev server
+npm run build    # Production build
+npm run lint     # Run linting
+npm run test     # Run tests
+```
 
-Push to the branch
-
-Open a Pull Request
-
-📄 License
+## 📄 License
 
 This project is licensed under the MIT License.
 
-👨‍💻 Author
+## 👨‍💻 Author
 
-Aditya Jha
-Built with ❤️ for mental wellness and mindful living.
+**Aditya Jha**
 
-🙏 Acknowledgments
+## 🙏 Acknowledgments
 
-Pixabay — Ambient meditation audio
+- [Pixabay](https://pixabay.com) for ambient audio tracks
+- [Unsplash](https://unsplash.com) for images
+- [shadcn/ui](https://ui.shadcn.com) for UI components
+- [Lucide](https://lucide.dev) for icons
 
-Unsplash — Yoga & wellness imagery
+---
 
-shadcn/ui — UI components
-
-Lucide — Icon set
-
-<p align="center"> <i>स्वस्थ रहें, खुश रहें</i> 🌿<br> <i>(Stay Healthy, Stay Happy)</i> </p> ```
-
-
-
-
+<p align="center">
+  <i>स्वस्थ रहें, खुश रहें</i> 🌿<br>
+  <i>(Stay Healthy, Stay Happy)</i>
+</p>

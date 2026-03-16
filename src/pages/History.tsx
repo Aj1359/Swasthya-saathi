@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Camera, Dumbbell, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,12 +81,16 @@ const History = () => {
               <div className="space-y-3">
                 {chatSessions.length === 0 && <p className="text-center text-muted-foreground py-8">No chat history yet. Talk to Ruhi! 💚</p>}
                 {chatSessions.map((s) => (
-                  <Card key={s.id} className="bg-card/80 border-border/50">
+                  <Card key={s.id} className="bg-card/80 border-border/50 cursor-pointer hover:bg-card/95 transition-colors"
+                    onClick={() => {
+                      localStorage.setItem('swasthyasaathi_session_id', s.id);
+                      navigate('/dashboard?chat=' + s.id);
+                    }}>
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">{s.lastMessage || 'Chat session'}</p>
-                          <p className="text-xs text-muted-foreground">{s.messageCount} messages</p>
+                          <p className="text-xs text-muted-foreground">{s.messageCount} messages • Click to continue</p>
                         </div>
                         <span className="text-xs text-muted-foreground shrink-0 ml-2">{s.date && fmt(s.date)}</span>
                       </div>
