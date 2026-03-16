@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface JournalEntry {
+  id: string;
   mood: number;
   reflection: string;
   created_at: string;
@@ -39,6 +40,7 @@ const REFLECTION_PROMPTS = [
 ];
 
 const MoodJournal = () => {
+
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -48,12 +50,14 @@ const MoodJournal = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* Load entries from DB */
+  /* Load journal entries */
 
   useEffect(() => {
+
     if (!user) return;
 
     const loadEntries = async () => {
+
       const { data, error } = await supabase
         .from("journal_entries")
         .select("*")
@@ -62,22 +66,28 @@ const MoodJournal = () => {
         .limit(5);
 
       if (error) {
+        console.error("Load error:", error);
+
         toast({
           title: "Could not load journal",
           description: error.message
         });
+
         return;
       }
 
       setEntries(data || []);
+
     };
 
     loadEntries();
+
   }, [user]);
 
-  /* Save entry */
+  /* Save journal entry */
 
   const saveEntry = async () => {
+
     if (!reflection.trim()) {
       toast({
         title: "Write something first 🌿",
@@ -86,42 +96,71 @@ const MoodJournal = () => {
       return;
     }
 
-    if (!user) return;
-
-    setLoading(true);
-
-    const { data, error } = await supabase
-      .from("journal_entries")
-      .insert({
-        user_id: user.id,
-        mood,
-        reflection: reflection.trim()
-      })
-      .select()
-      .single();
-
-    setLoading(false);
-
-    if (error) {
+    if (!user) {
       toast({
-        title: "Error saving journal",
-        description: error.message
+        title: "Login required",
+        description: "Please login to save your journal"
       });
       return;
     }
 
-    toast({
-      title: "Journal saved 💚",
-      description: "Your reflection has been recorded."
-    });
+    try {
 
-    setEntries(prev => [data, ...prev]);
+      setLoading(true);
 
-    setReflection("");
-    setIntention("");
+      const { data, error } = await supabase
+        .from("journal_entries")
+        .insert([
+          {
+            user_id: user.id,
+            mood: mood,
+            reflection: reflection.trim()
+          }
+        ])
+        .select()
+        .single();
+
+      setLoading(false);
+
+      if (error) {
+        console.error("Insert error:", error);
+
+        toast({
+          title: "Error saving journal",
+          description: error.message
+        });
+
+        return;
+      }
+
+      toast({
+        title: "Journal saved 💚",
+        description: "Your reflection has been recorded."
+      });
+
+      /* Update UI */
+
+      setEntries(prev => [data, ...prev]);
+
+      setReflection("");
+      setIntention("");
+
+    } catch (err) {
+
+      console.error("Unexpected error:", err);
+
+      toast({
+        title: "Unexpected error",
+        description: "Something went wrong."
+      });
+
+      setLoading(false);
+    }
+
   };
 
   return (
+
     <Card className="border-border/50 bg-card/80 backdrop-blur-xl shadow-xl">
 
       {/* Header */}
@@ -135,18 +174,22 @@ const MoodJournal = () => {
 
       <CardContent className="space-y-6">
 
-        {/* Mood selector */}
+        {/* Mood Selector */}
 
         <div>
+
           <p className="text-sm font-medium text-muted-foreground mb-3">
             How are you feeling today?
           </p>
 
           <div className="flex gap-2">
+
             {MOOD_OPTIONS.map(opt => {
+
               const Icon = opt.icon;
 
               return (
+
                 <button
                   key={opt.value}
                   onClick={() => setMood(opt.value)}
@@ -156,6 +199,7 @@ const MoodJournal = () => {
                       : "bg-muted/50 hover:bg-muted"
                   }`}
                 >
+
                   <Icon
                     className={`w-6 h-6 ${
                       mood === opt.value
@@ -165,23 +209,27 @@ const MoodJournal = () => {
                   />
 
                   <span className="text-xs">{opt.label}</span>
-                </button>
-              );
-            })}
-          </div>
 
-          {/* Mood scale */}
+                </button>
+
+              );
+
+            })}
+
+          </div>
 
           <div className="flex justify-between text-xs text-muted-foreground mt-2 px-1">
             <span>Rough</span>
             <span>Okay</span>
             <span>Great</span>
           </div>
+
         </div>
 
         {/* Reflection */}
 
         <div>
+
           <p className="text-sm font-medium text-muted-foreground mb-2">
             What's on your mind today?
           </p>
@@ -193,10 +241,10 @@ const MoodJournal = () => {
             className="min-h-[120px] bg-muted/30 border-border/50 rounded-xl resize-none"
           />
 
-          {/* Prompt helpers */}
-
           <div className="flex flex-wrap gap-2 mt-3">
+
             {REFLECTION_PROMPTS.map(prompt => (
+
               <button
                 key={prompt}
                 onClick={() => setReflection(prompt + " ")}
@@ -204,13 +252,17 @@ const MoodJournal = () => {
               >
                 {prompt}
               </button>
+
             ))}
+
           </div>
+
         </div>
 
-        {/* Intention field (UI only) */}
+        {/* Intention (UI only) */}
 
         <div>
+
           <p className="text-sm font-medium text-muted-foreground mb-2">
             Today's small intention 🌱
           </p>
@@ -221,9 +273,10 @@ const MoodJournal = () => {
             placeholder="Example: Take a short walk, drink more water..."
             className="min-h-[60px] bg-muted/30 border-border/50 rounded-xl resize-none"
           />
+
         </div>
 
-        {/* Save button */}
+        {/* Save Button */}
 
         <Button
           onClick={saveEntry}
@@ -231,13 +284,13 @@ const MoodJournal = () => {
           className="w-full rounded-xl bg-gradient-to-r from-primary to-green-500 text-white shadow-lg"
         >
           <Save className="w-4 h-4 mr-2" />
-
           {loading ? "Saving..." : "Save Reflection"}
         </Button>
 
-        {/* Recent entries */}
+        {/* Recent Entries */}
 
         {entries.length > 0 && (
+
           <div className="pt-4 border-t border-border/50">
 
             <p className="text-sm font-medium mb-3 flex items-center gap-2">
@@ -246,21 +299,30 @@ const MoodJournal = () => {
             </p>
 
             <div className="space-y-2">
-              {entries.slice(0, 3).map((e, i) => (
+
+              {entries.slice(0, 3).map(entry => (
+
                 <div
-                  key={i}
+                  key={entry.id}
                   className="p-3 rounded-lg bg-muted/30 text-sm"
                 >
-                  {e.reflection}
+                  {entry.reflection}
                 </div>
+
               ))}
+
             </div>
+
           </div>
+
         )}
 
       </CardContent>
+
     </Card>
+
   );
+
 };
 
 export default MoodJournal;
