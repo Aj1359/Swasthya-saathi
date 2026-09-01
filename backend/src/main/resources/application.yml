@@ -1,0 +1,32 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: swasthya-saathi-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:}
+    url: https://generativelanguage.googleapis.com/v1beta/models
+  models:
+    embedding: gemini-embedding-001
+    generation: gemini-2.5-flash
+
+jwt:
+  secret: ${JWT_SECRET:your_very_secret_key_needs_to_be_at_least_256_bits_long_for_security_reasons_1234567890}
+  expiration: 900000 # 15 minutes (in milliseconds)
+  refresh-expiration: 604800000 # 7 days (in milliseconds)

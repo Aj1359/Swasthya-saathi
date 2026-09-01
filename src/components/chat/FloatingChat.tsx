@@ -15,6 +15,8 @@ interface Message {
   content: string;
 }
 
+// We use supabase.functions.invoke instead of raw fetch — it attaches the user's JWT automatically.
+// CHAT_URL kept as fallback for streaming (supabase SDK doesn't yet stream).
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ruhi-chat`;
 
 const getSessionId = () => {
@@ -23,7 +25,12 @@ const getSessionId = () => {
   return id;
 };
 
-const FloatingChat = () => {
+interface FloatingChatProps {
+  initialMessage?: string;
+  onMessageSent?: () => void;
+}
+
+const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
   const { userData, updateIndices } = useUser();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -35,10 +42,19 @@ const FloatingChat = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [hasMemory, setHasMemory] = useState(false); // true when prior session messages were found
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<{ stop: () => void } | null>(null);
   const sessionId = useRef(getSessionId());
+
+  // Open and pre-fill if 'Send to Ruhi' was triggered from a scan result
+  useEffect(() => {
+    if (initialMessage && initialMessage.trim()) {
+      setInput(initialMessage);
+      setIsOpen(true);
+    }
+  }, [initialMessage]);
 
   // Open chat if navigated with ?chat=SESSION_ID
   useEffect(() => {
@@ -50,15 +66,36 @@ const FloatingChat = () => {
       setIsOpen(true);
       setSearchParams({}, { replace: true });
     }
-  }, [searchParams]);
+  }, [searchParams, setSearchParams]);
+
+
+  const getGreeting = useCallback(() => {
+    if (!userData) return "Hey! I'm Ruhi 💚";
+    const name = userData.name;
+    if (userData.occupation === 'college_student') return `Hey ${name}! 💚 I'm Ruhi — your buddy here. College life can be wild, right? 🎢\n\nJust tell me what's up. How are you doing today? Like, *really* doing? 🌿`;
+    if (userData.occupation === 'school_student') return `Hey ${name}! 💚 I'm Ruhi — think of me as your cool older sister who gets it.\n\nSchool can be a lot sometimes. What's on your mind? 🌿`;
+    if (userData.occupation === 'working_professional') return `Hey ${name}! 💚 I'm Ruhi — your wellness companion.\n\nWork-life balance is real struggle, isn't it? How are you feeling today? 🌿`;
+    return `Hey ${name}! 💚 I'm Ruhi — think of me as a friend who actually listens.\n\nWhat's going on with you today? I'm all ears 🌿`;
+  }, [userData]);
+
+  const saveMessage = useCallback(async (role: string, content: string) => {
+    await supabase.from('chat_messages').insert({ session_id: sessionId.current, role, content, user_id: user?.id || null });
+  }, [user]);
 
   useEffect(() => {
     if (isOpen && !historyLoaded) {
       const loadHistory = async () => {
         const { data } = await supabase.from('chat_messages').select('*').eq('session_id', sessionId.current).order('created_at', { ascending: true }).limit(50);
         if (data && data.length > 0) {
-          setMessages(data.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content })));
+          setMessages(data.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })));
+          setHasMemory(false); // current session, no memory banner needed
         } else if (userData) {
+          // Check if there are past sessions to set memory indicator
+          if (user) {
+            const { data: pastCheck } = await supabase.from('chat_messages')
+              .select('id').eq('user_id', user.id).neq('session_id', sessionId.current).limit(1);
+            setHasMemory(!!pastCheck && pastCheck.length > 0);
+          }
           const greeting = getGreeting();
           setMessages([{ role: 'assistant', content: greeting }]);
           saveMessage('assistant', greeting);
@@ -67,23 +104,10 @@ const FloatingChat = () => {
       };
       loadHistory();
     }
-  }, [isOpen, historyLoaded]);
-
-  const getGreeting = () => {
-    if (!userData) return "Hey! I'm Ruhi 💚";
-    const name = userData.name;
-    if (userData.occupation === 'college_student') return `Hey ${name}! 💚 I'm Ruhi — your buddy here. College life can be wild, right? 🎢\n\nJust tell me what's up. How are you doing today? Like, *really* doing? 🌿`;
-    if (userData.occupation === 'school_student') return `Hey ${name}! 💚 I'm Ruhi — think of me as your cool older sister who gets it.\n\nSchool can be a lot sometimes. What's on your mind? 🌿`;
-    if (userData.occupation === 'working_professional') return `Hey ${name}! 💚 I'm Ruhi — your wellness companion.\n\nWork-life balance is real struggle, isn't it? How are you feeling today? 🌿`;
-    return `Hey ${name}! 💚 I'm Ruhi — think of me as a friend who actually listens.\n\nWhat's going on with you today? I'm all ears 🌿`;
-  };
-
-  const saveMessage = async (role: string, content: string) => {
-    await supabase.from('chat_messages').insert({ session_id: sessionId.current, role, content, user_id: user?.id || null });
-  };
+  }, [isOpen, historyLoaded, user, userData, getGreeting, saveMessage]);
 
   const getActivityContext = () => { const d = localStorage.getItem('swasthyasaathi_daily'); return d ? JSON.parse(d) : null; };
-  const getJournalContext = () => { const s = localStorage.getItem('swasthyasaathi_journal'); if (!s) return []; return Object.values(JSON.parse(s)).sort((a: any, b: any) => b.timestamp - a.timestamp).slice(0, 5); };
+  const getJournalContext = () => { const s = localStorage.getItem('swasthyasaathi_journal'); if (!s) return []; return Object.values(JSON.parse(s)).sort((a: unknown, b: unknown) => (b as { timestamp: number }).timestamp - (a as { timestamp: number }).timestamp).slice(0, 5); };
   const getFaceScanData = () => { const s = localStorage.getItem('swasthyasaathi_face_scan'); return s ? JSON.parse(s) : null; };
   const getFaceScanHistory = () => { const s = localStorage.getItem('swasthyasaathi_face_history'); return s ? JSON.parse(s).slice(-7) : []; };
 
@@ -91,10 +115,32 @@ const FloatingChat = () => {
   useEffect(() => { if (isOpen) inputRef.current?.focus(); }, [isOpen]);
 
   const startListening = useCallback(() => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const win = window as unknown as {
+      SpeechRecognition?: new () => {
+        lang: string;
+        interimResults: boolean;
+        continuous: boolean;
+        onresult: (e: { results: Iterable<ArrayLike<{ transcript: string }>> }) => void;
+        onend: () => void;
+        onerror: () => void;
+        start: () => void;
+        stop: () => void;
+      };
+      webkitSpeechRecognition?: new () => {
+        lang: string;
+        interimResults: boolean;
+        continuous: boolean;
+        onresult: (e: { results: Iterable<ArrayLike<{ transcript: string }>> }) => void;
+        onend: () => void;
+        onerror: () => void;
+        start: () => void;
+        stop: () => void;
+      };
+    };
+    const SR = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!SR) return;
     const r = new SR(); r.lang = 'en-IN'; r.interimResults = true; r.continuous = false;
-    r.onresult = (e: any) => { setInput(Array.from(e.results).map((r: any) => r[0].transcript).join('')); };
+    r.onresult = (e) => { setInput(Array.from(e.results).map((item) => item[0].transcript).join('')); };
     r.onend = () => setIsListening(false); r.onerror = () => setIsListening(false);
     r.start(); recognitionRef.current = r; setIsListening(true);
   }, []);
@@ -104,7 +150,7 @@ const FloatingChat = () => {
   const speak = useCallback((text: string) => {
     if (!voiceEnabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    const cleaned = text.replace(/[#*_~`>|]/g, '').replace(/\[.*?\]\(.*?\)/g, '');
+    const cleaned = text.replace(/[#*_~`>|]/g, '').replace(/\[.*?\]\(.*?\)/g, '').replace(/\p{Extended_Pictographic}/gu, '');
     const u = new SpeechSynthesisUtterance(cleaned); u.lang = 'en-IN'; u.rate = 0.95; u.pitch = 1.1;
     u.onstart = () => setIsSpeaking(true); u.onend = () => setIsSpeaking(false); u.onerror = () => setIsSpeaking(false);
     window.speechSynthesis.speak(u);
@@ -116,9 +162,11 @@ const FloatingChat = () => {
     if (!userData) return;
     const l = content.toLowerCase();
     let hd = 0, hed = 0;
-    if (l.includes('great job') || l.includes('proud') || l.includes('awesome')) hd += 2;
-    if (l.includes('stressed') || l.includes('overwhelmed') || l.includes('anxious')) hd -= 1;
-    if (l.includes('meditation') || l.includes('yoga') || l.includes('breathing')) hed += 1;
+    // Positive signals (Ruhi affirming)
+    if (/\b(great job|proud of you|awesome|well done|that's wonderful)\b/.test(l)) hd += 2;
+    // Only deduct if not in a negation context
+    if (/\b(stressed|overwhelmed|anxious|hopeless)\b/.test(l) && !/\b(not|no longer|less|better|feeling good)\b/.test(l)) hd -= 1;
+    if (/\b(meditation|yoga|breathing exercise|pranayama)\b/.test(l)) hed += 1;
     if (hd !== 0 || hed !== 0) {
       const nH = Math.min(100, Math.max(5, userData.happinessIndex + hd));
       const nHe = Math.min(100, Math.max(5, userData.healthIndex + hed));
@@ -136,12 +184,23 @@ const FloatingChat = () => {
     let assistantContent = '';
 
     try {
+      const voiceMoodData = (() => { const s = localStorage.getItem('swasthyasaathi_voice_mood'); return s ? JSON.parse(s) : null; })();
       const response = await fetch(CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({
           messages: [...messages, userMessage],
-          userData: { ...userData, activityData: getActivityContext(), journalEntries: getJournalContext(), faceScanData: getFaceScanData(), faceScanHistory: getFaceScanHistory() },
+          userData: {
+            ...userData,
+            userId: user?.id || null,
+            currentSessionId: sessionId.current,
+            chatMemoryEnabled: true,
+            activityData: getActivityContext(),
+            journalEntries: getJournalContext(),
+            faceScanData: getFaceScanData(),
+            faceScanHistory: getFaceScanHistory(),
+            voiceMoodData,
+          },
         }),
       });
 
@@ -200,7 +259,8 @@ const FloatingChat = () => {
     saveMessage('assistant', greeting);
   };
 
-  const hasSpeechRecognition = !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+  const win = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+  const hasSpeechRecognition = !!(win.SpeechRecognition || win.webkitSpeechRecognition);
 
   return (
     <>
@@ -233,13 +293,13 @@ const FloatingChat = () => {
                 </h3>
                 <p className="text-xs opacity-80 flex items-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${isSpeaking ? 'bg-secondary animate-pulse' : 'bg-green-400 animate-pulse'}`} />
-                  {isSpeaking ? 'Speaking...' : 'Powered by SwasthyaSaathi'}
+                  {isSpeaking ? 'Speaking...' : hasMemory ? '🧠 Remembers your last chat' : 'Powered by SwasthyaSaathi'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <Button size="icon" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/20 h-8 w-8"
-                onClick={() => { voiceEnabled ? stopSpeaking() : null; setVoiceEnabled(!voiceEnabled); }}
+                onClick={() => { if (voiceEnabled) stopSpeaking(); setVoiceEnabled(!voiceEnabled); }}
                 title={voiceEnabled ? 'Mute voice' : 'Enable voice'}>
                 {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </Button>

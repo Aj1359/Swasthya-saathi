@@ -12,6 +12,30 @@ dist
 dist-ssr
 *.local
 
+# Java & Maven build output
+target/
+backend/target/
+backend/maven/
+*.class
+*.jar
+*.war
+
+# Sensitive & Environment files
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.secret
+
+# Interview files
+interview.md
+*interview*
+
+# Temp directories
+supabase/.temp/
+.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

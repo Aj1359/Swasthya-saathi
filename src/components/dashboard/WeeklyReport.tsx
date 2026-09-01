@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
@@ -21,20 +21,16 @@ const WeeklyReport = () => {
   const { user } = useAuth();
   const [report, setReport] = useState<WeekSummary | null>(null);
 
-  useEffect(() => {
+  const generateReport = useCallback(async () => {
     if (!user) return;
-    generateReport();
-  }, [user]);
-
-  const generateReport = async () => {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     const weekStr = weekAgo.toISOString();
 
     const [scans, activities, journals] = await Promise.all([
-      supabase.from('face_scans').select('*').eq('user_id', user!.id).gte('created_at', weekStr),
-      supabase.from('activity_logs').select('*').eq('user_id', user!.id).gte('created_at', weekStr),
-      supabase.from('journal_entries').select('*').eq('user_id', user!.id).gte('created_at', weekStr),
+      supabase.from('face_scans').select('*').eq('user_id', user.id).gte('created_at', weekStr),
+      supabase.from('activity_logs').select('*').eq('user_id', user.id).gte('created_at', weekStr),
+      supabase.from('journal_entries').select('*').eq('user_id', user.id).gte('created_at', weekStr),
     ]);
 
     const moodScores: Record<string, number> = { happy: 5, neutral: 3, sad: 1, anxious: 2, stressed: 2, tired: 2, angry: 1 };
@@ -47,7 +43,7 @@ const WeeklyReport = () => {
     });
 
     const dominantMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'neutral';
-    const avgMood = (scans.data?.length || 0) > 0 ? totalMoodScore / scans.data!.length : 3;
+    const avgMood = scans.data && scans.data.length > 0 ? Math.round((totalMoodScore / scans.data.length) * 20) : 60;
 
     let med = 0, yoga = 0, breath = 0;
     (activities.data || []).forEach(a => {
@@ -56,7 +52,11 @@ const WeeklyReport = () => {
       if (a.activity_type === 'breathing') breath += a.duration_minutes || 0;
     });
 
-    const trend = avgMood >= 4 ? 'up' : avgMood <= 2 ? 'down' : 'stable';
+    const currentScore = avgMood;
+    const previousScore = userData?.happinessIndex || 60;
+    let trend: 'up' | 'down' | 'stable' = 'stable';
+    if (currentScore > previousScore + 5) trend = 'up';
+    else if (currentScore < previousScore - 5) trend = 'down';
 
     setReport({
       avgMood,
@@ -68,7 +68,13 @@ const WeeklyReport = () => {
       dominantMood,
       trend,
     });
-  };
+  }, [user, userData?.happinessIndex]);
+
+  useEffect(() => {
+    generateReport();
+  }, [generateReport]);
+
+
 
   if (!report) return null;
 

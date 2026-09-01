@@ -79,6 +79,9 @@ export type Database = {
           health_flags: string[] | null
           id: string
           mood: string
+          posture_score: number | null
+          posture_flags: string[] | null
+          posture_mode: boolean | null
           user_id: string
           wellness_tip: string | null
         }
@@ -89,6 +92,9 @@ export type Database = {
           health_flags?: string[] | null
           id?: string
           mood: string
+          posture_score?: number | null
+          posture_flags?: string[] | null
+          posture_mode?: boolean | null
           user_id: string
           wellness_tip?: string | null
         }
@@ -99,6 +105,9 @@ export type Database = {
           health_flags?: string[] | null
           id?: string
           mood?: string
+          posture_score?: number | null
+          posture_flags?: string[] | null
+          posture_mode?: boolean | null
           user_id?: string
           wellness_tip?: string | null
         }

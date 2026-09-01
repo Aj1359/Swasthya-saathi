@@ -2,7 +2,9 @@
 -- Profiles table for user data persistence
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  email VARCHAR(255) UNIQUE,
+  password_hash VARCHAR(255),
   name TEXT NOT NULL DEFAULT '',
   gender TEXT DEFAULT '',
   age INTEGER DEFAULT 20,
@@ -112,7 +114,7 @@ CREATE TRIGGER update_profiles_updated_at
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (user_id) VALUES (NEW.id);
+  INSERT INTO public.profiles (user_id, email, password_hash) VALUES (NEW.id, NEW.email, '');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

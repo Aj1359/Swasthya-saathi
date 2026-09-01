@@ -293,12 +293,12 @@ const videos = [
 ];
 
 const pdfs = [
-  { title: 'Understanding Depression — WHO Guide', size: '2.1 MB', link: 'https://www.who.int/publications/i/item/depression-and-other-common-mental-disorders', color: '#6366f1' },
-  { title: 'Anxiety Workbook (CCI)', size: '1.4 MB', link: 'https://www.cci.health.wa.gov.au/Resources/Looking-After-Yourself/Anxiety', color: '#f59e0b' },
-  { title: 'Grief & Loss — Coping Toolkit', size: '3.2 MB', link: 'https://www.cancer.org/cancer/managing-cancer/end-of-life-care/grief-and-loss.html', color: '#ec4899' },
-  { title: 'Mindfulness for Beginners (Jon Kabat-Zinn)', size: '890 KB', link: 'https://www.mindful.org/jon-kabat-zinn-defining-mindfulness/', color: '#10b981' },
-  { title: 'Dopamine Nation — Book Overview', size: '1.1 MB', link: 'https://www.penguinrandomhouse.com/books/609049/dopamine-nation-by-anna-lembke/', color: '#7c3aed' },
-  { title: 'Atomic Habits — Summary & Worksheets', size: '780 KB', link: 'https://jamesclear.com/atomic-habits', color: '#f97316' },
+  { title: 'The Body Keeps the Score', author: 'Bessel van der Kolk', size: '2.5 MB', link: 'https://besselvanderkolk.com', color: '#6366f1' },
+  { title: 'Atomic Habits', author: 'James Clear', size: '1.4 MB', link: 'https://jamesclear.com/atomic-habits', color: '#f59e0b' },
+  { title: 'Man\'s Search for Meaning', author: 'Viktor E. Frankl', size: '3.2 MB', link: '#', color: '#ec4899' },
+  { title: 'Dopamine Nation', author: 'Dr. Anna Lembke', size: '1.1 MB', link: 'https://www.penguinrandomhouse.com/books/609049/dopamine-nation-by-anna-lembke/', color: '#7c3aed' },
+  { title: 'Feeling Good: The New Mood Therapy', author: 'David D. Burns', size: '1.8 MB', link: '#', color: '#10b981' },
+  { title: 'Lost Connections', author: 'Johann Hari', size: '2.1 MB', link: '#', color: '#0ea5e9' },
 ];
 
 const CATEGORIES = [
@@ -484,8 +484,8 @@ const BooksTab = () => {
             <Brain style={{ width: 26, height: 26, color: '#fff' }} />
           </div>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: 'var(--foreground)' }}>The Unspoken Room</h2>
-            <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: '3px 0 0' }}>Read full articles inside the app — no need to leave. From the world's top experts.</p>
+            <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: 'var(--foreground)' }}>Mental Health Library</h2>
+            <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: '3px 0 0' }}>Read full articles and access essential books on mental wellness and psychology.</p>
           </div>
         </div>
       </div>
@@ -662,18 +662,18 @@ const BooksTab = () => {
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <FileText style={{ width: 18, height: 18, color: '#f59e0b' }} />
-          <h3 style={{ fontWeight: 800, fontSize: 16, margin: 0, color: 'var(--foreground)' }}>Free PDF Resources</h3>
+          <h3 style={{ fontWeight: 800, fontSize: 16, margin: 0, color: 'var(--foreground)' }}>Essential Books & Previews</h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
           {pdfs.map((pdf, i) => (
             <a key={i} href={pdf.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
               <div className="glass-card" style={{ borderRadius: 14, padding: '16px 18px', cursor: 'pointer', transition: 'transform .2s, box-shadow .2s', display: 'flex', alignItems: 'center', gap: 14 }} onMouseEnter={e => hov(e, true)} onMouseLeave={e => hov(e, false)}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: `${pdf.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <FileText style={{ width: 22, height: 22, color: pdf.color }} />
+                  <BookOpen style={{ width: 22, height: 22, color: pdf.color }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontWeight: 700, fontSize: 13, margin: '0 0 3px', color: 'var(--foreground)', lineHeight: 1.35 }}>{pdf.title}</p>
-                  <p style={{ fontSize: 11, color: 'var(--muted-foreground)', margin: 0 }}>{pdf.size} · Free Download</p>
+                  <p style={{ fontSize: 11, color: 'var(--muted-foreground)', margin: 0 }}>{pdf.author} · {pdf.size}</p>
                 </div>
                 <ExternalLink style={{ width: 15, height: 15, color: pdf.color, flexShrink: 0 }} />
               </div>

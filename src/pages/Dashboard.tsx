@@ -17,16 +17,43 @@ import BooksTab from '@/components/tabs/BooksTab';
 import FloatingChat from '@/components/chat/FloatingChat';
 import MoodJournal from '@/components/journal/MoodJournal';
 import PeerSupport from '@/components/community/PeerSupport';
-import FaceMoodReader from '@/components/mood/FaceMoodReader';
+import FaceMoodReader, { MoodResult } from '@/components/mood/FaceMoodReader';
+import VoiceMoodReader, { VoiceMoodResult } from '@/components/mood/VoiceMoodReader';
 import ProfileMenu from '@/components/profile/ProfileMenu';
 import StudentMode from '@/components/student/StudentMode';
 import CrisisSupport from '@/components/crisis/CrisisSupport';
-import { Heart, Music, Flower2, Wind, BookOpen, Phone, Sparkles, Users, Home, Dumbbell, GraduationCap } from 'lucide-react';
+import PreventionTab from '@/components/tabs/PreventionTab';
+import PostureDetector from '@/components/mood/PostureDetector';
+import { Heart, Music, Flower2, Wind, BookOpen, Phone, Sparkles, Users, Home, Dumbbell, GraduationCap, Shield, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 
-type MobileSection = 'home' | 'exercises' | 'books' | 'read';
+type MobileSection = 'home' | 'exercises' | 'books' | 'community' | 'prevention';
+
+interface FaceScanResult {
+  mood: string;
+  confidence: number;
+  description: string;
+  wellness_tip: string;
+  health_flags?: string[];
+  posture_score?: number | null;
+  posture_flags?: string[];
+  posture_tip?: string | null;
+  timestamp: number;
+  date: string;
+}
+
+interface SharedMoodScanResult {
+  mood: string;
+  confidence: number;
+  description: string;
+  wellness_tip: string;
+  health_flags?: string[];
+  posture_score?: number | null;
+  posture_flags?: string[];
+  mental_state_indicators?: string[];
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -34,7 +61,8 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('meditation');
   const [mobileSection, setMobileSection] = useState<MobileSection>('home');
-  const [lastFaceScan, setLastFaceScan] = useState<any>(null);
+  const [lastFaceScan, setLastFaceScan] = useState<FaceScanResult | null>(null);
+  const [pendingRuhiMessage, setPendingRuhiMessage] = useState<string>('');
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -48,7 +76,7 @@ const Dashboard = () => {
 
   if (!userData) return null;
 
-  const handleFaceMoodDetected = async (result: any) => {
+  const handleFaceMoodDetected = async (result: SharedMoodScanResult) => {
     const scanData = { ...result, timestamp: Date.now(), date: new Date().toISOString().split('T')[0] };
     localStorage.setItem('swasthyasaathi_face_scan', JSON.stringify(scanData));
     const historyRaw = localStorage.getItem('swasthyasaathi_face_history');
@@ -77,6 +105,11 @@ const Dashboard = () => {
     }
   };
 
+  const handleSendToRuhi = (scanResult: SharedMoodScanResult) => {
+    const msg = `I just did a face mood scan. My mood shows as ${scanResult.mood} with ${scanResult.confidence}% confidence. ${scanResult.health_flags?.length > 0 ? `Health signals detected: ${scanResult.health_flags.join(', ')}.` : ''} ${scanResult.posture_flags?.length > 0 && !scanResult.posture_flags.includes('good_alignment') ? `Posture issues: ${scanResult.posture_flags.join(', ')}.` : ''} Can you help me with this?`;
+    setPendingRuhiMessage(msg);
+  };
+
   const isStudent = userData.occupation === 'college_student' || userData.occupation === 'school_student';
 
   const renderHomeSection = () => (
@@ -102,7 +135,10 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-          <FaceMoodReader onMoodDetected={handleFaceMoodDetected} />
+          <div className="flex flex-col gap-2 shrink-0">
+            <FaceMoodReader onMoodDetected={handleFaceMoodDetected} onSendToRuhi={handleSendToRuhi} />
+            <VoiceMoodReader onMoodDetected={handleFaceMoodDetected} />
+          </div>
         </div>
       )}
 
@@ -147,7 +183,8 @@ const Dashboard = () => {
     { id: 'home', label: 'Home', icon: <Home className="w-5 h-5" /> },
     { id: 'exercises', label: 'Exercises', icon: <Dumbbell className="w-5 h-5" /> },
     { id: 'books', label: 'Books', icon: <BookOpen className="w-5 h-5" /> },
-    { id: 'read', label: 'Community', icon: <Users className="w-5 h-5" /> },
+    { id: 'prevention', label: 'Prevention', icon: <Shield className="w-5 h-5" /> },
+    { id: 'community', label: 'Student Community', icon: <Users className="w-5 h-5" /> },
   ];
 
   return (
@@ -166,7 +203,13 @@ const Dashboard = () => {
           </div>
 
           <div className="flex items-center gap-1">
-            {!lastFaceScan && <FaceMoodReader onMoodDetected={handleFaceMoodDetected} />}
+            {!lastFaceScan && (
+              <div className="flex items-center gap-1">
+                <FaceMoodReader onMoodDetected={handleFaceMoodDetected} onSendToRuhi={handleSendToRuhi} />
+                <VoiceMoodReader onMoodDetected={handleFaceMoodDetected} />
+                <PostureDetector />
+              </div>
+            )}
             <Button variant="outline" size="sm" className="hidden md:flex border-primary/30 hover:bg-primary/10"
               onClick={() => window.open('tel:+911234567890', '_self')}>
               <Phone className="w-4 h-4 mr-2 text-primary" /> Consult Doctor
@@ -182,8 +225,14 @@ const Dashboard = () => {
             {mobileSection === 'home' && renderHomeSection()}
             {mobileSection === 'exercises' && renderExercisesSection()}
             {mobileSection === 'books' && <BooksTab />}
-            {mobileSection === 'read' && (
-              <div className="grid lg:grid-cols-2 gap-6">
+            {mobileSection === 'prevention' && <PreventionTab />}
+            {mobileSection === 'community' && (
+              <div className="space-y-6">
+                <div className="glass-card p-4 text-center rounded-2xl bg-gradient-to-br from-primary/10 to-transparent">
+                  <h3 className="font-bold text-lg text-foreground">Student Community</h3>
+                  <p className="text-sm text-muted-foreground">Dedicated safe space and tools for students.</p>
+                </div>
+                {isStudent && <StudentMode />}
                 <MoodJournal />
                 <PeerSupport />
               </div>
@@ -206,11 +255,15 @@ const Dashboard = () => {
                 <TabsTrigger value="books" className="flex items-center gap-2 rounded-xl py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-secondary data-[state=active]:to-amber data-[state=active]:text-secondary-foreground data-[state=active]:shadow-lg transition-all">
                   <BookOpen className="w-5 h-5" /><span className="hidden sm:inline font-medium">Books</span>
                 </TabsTrigger>
+                <TabsTrigger value="prevention" className="flex items-center gap-2 rounded-xl py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all">
+                  <Shield className="w-5 h-5" /><span className="hidden sm:inline font-medium">Prevention</span>
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="meditation" className="mt-0"><MeditationTab /></TabsContent>
               <TabsContent value="yoga" className="mt-0"><YogaTab /></TabsContent>
               <TabsContent value="breathing" className="mt-0"><BreathingTab /></TabsContent>
               <TabsContent value="books" className="mt-0"><BooksTab /></TabsContent>
+              <TabsContent value="prevention" className="mt-0"><PreventionTab /></TabsContent>
             </Tabs>
           </>
         )}
@@ -232,7 +285,7 @@ const Dashboard = () => {
         </nav>
       )}
 
-      <FloatingChat />
+      <FloatingChat initialMessage={pendingRuhiMessage} onMessageSent={() => setPendingRuhiMessage('')} />
     </div>
   );
 };

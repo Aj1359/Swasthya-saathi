@@ -8,20 +8,30 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { Database } from '@/integrations/supabase/types';
+import { useCallback } from 'react';
+
+type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'];
+type FaceScanRow = Database['public']['Tables']['face_scans']['Row'];
+type ActivityLogRow = Database['public']['Tables']['activity_logs']['Row'];
+type JournalEntryRow = Database['public']['Tables']['journal_entries']['Row'];
+
+interface ChatSession {
+  id: string;
+  messageCount: number;
+  lastMessage: string | undefined;
+  date: string;
+}
+
 const History = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [chatSessions, setChatSessions] = useState<any[]>([]);
-  const [faceScans, setFaceScans] = useState<any[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [journals, setJournals] = useState<any[]>([]);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [faceScans, setFaceScans] = useState<FaceScanRow[]>([]);
+  const [activities, setActivities] = useState<ActivityLogRow[]>([]);
+  const [journals, setJournals] = useState<JournalEntryRow[]>([]);
 
-  useEffect(() => {
-    if (!user) return;
-    loadHistory();
-  }, [user]);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     if (!user) return;
 
     const [chats, scans, acts, jrnls] = await Promise.all([
@@ -33,7 +43,7 @@ const History = () => {
 
     if (chats.data) {
       // Group by session
-      const sessions: Record<string, any[]> = {};
+      const sessions: Record<string, ChatMessageRow[]> = {};
       chats.data.forEach((m) => {
         if (!sessions[m.session_id]) sessions[m.session_id] = [];
         sessions[m.session_id].push(m);
@@ -48,7 +58,11 @@ const History = () => {
     if (scans.data) setFaceScans(scans.data);
     if (acts.data) setActivities(acts.data);
     if (jrnls.data) setJournals(jrnls.data);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const moodEmojis: Record<string, string> = {
     happy: '😊', sad: '😢', angry: '😤', anxious: '😰', neutral: '😐', tired: '😴', stressed: '😣',

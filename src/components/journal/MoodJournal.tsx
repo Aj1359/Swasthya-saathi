@@ -82,7 +82,7 @@ const MoodJournal = () => {
 
     loadEntries();
 
-  }, [user]);
+  }, [user, toast]);
 
   /* Save journal entry */
 

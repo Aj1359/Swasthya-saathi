@@ -6,25 +6,39 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { imageBase64, augmentPass } = await req.json();
+    const { imageBase64, augmentPass, postureMode } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    if (!imageBase64) {
-      throw new Error("No image provided");
-    }
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!imageBase64) throw new Error("No image provided");
 
     const augmentNote = typeof augmentPass === 'number' && augmentPass > 0
       ? ` This is inference pass ${augmentPass + 1}. Apply slight variation in your analysis perspective to enable ensemble averaging.`
       : '';
+
+    const postureAnalysisSection = postureMode ? `
+POSTURE ANALYSIS (user is in posture mode — upper body visible):
+Carefully analyse the neck, shoulders, and spine alignment:
+- Head position: Is the head forward (forward head posture), tilted, or aligned with shoulders?
+- Shoulder alignment: Are shoulders level or is one higher/lower? Are they rounded forward?
+- Spine: Is there visible slouching or kyphosis (upper back rounding)?
+- Chin-to-chest distance: Is the neck craning forward?
+
+Populate posture_flags with any of these applicable strings:
+["forward_head", "rounded_shoulders", "left_shoulder_elevated", "right_shoulder_elevated", 
+ "upper_back_rounded", "neck_strain", "head_tilt_left", "head_tilt_right", "chin_forward",
+ "asymmetric_posture", "good_alignment"]
+
+Calculate posture_score (0-100): 
+- 100 = perfect upright alignment
+- 80-99 = minor adjustments needed
+- 60-79 = moderate postural issues
+- 40-59 = significant postural problems
+- below 40 = severe postural strain` : `
+POSTURE ANALYSIS: postureMode is off. Set posture_score to null and posture_flags to [].`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -37,28 +51,44 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an advanced facial emotion and health analysis expert. Analyze the face in the image with clinical precision. You MUST detect subtle expressions including neutral faces.
+            content: `You are an advanced AI health and wellness analyst. Analyze facial expressions, visible health indicators, and (when posture mode is active) body alignment with clinical precision.
 
-EMOTION DETECTION RULES:
-- Detect one of: "happy", "sad", "angry", "anxious", "neutral", "tired", "stressed"
-- For NEUTRAL faces: Look carefully at micro-expressions — slight lip tension, eye narrowing, brow position, skin pallor, under-eye darkness
-- A "neutral" face is VALID. Do not force a strong emotion if the face is genuinely neutral
-- Confidence should reflect how clear the expression is (neutral faces can have high confidence too)
+EMOTION DETECTION (always):
+Detect one of: "happy", "sad", "angry", "anxious", "neutral", "tired", "stressed", "content", "fearful", "disgusted", "surprised", "grief"
+- Distinguish "content" (calm satisfaction) from "happy" (active joy)
+- Distinguish "fearful" (wide eyes, raised brows, open mouth) from "anxious" (furrowed brow, tight jaw, worried expression)
+- A genuine "neutral" face is valid with high confidence
+- Confidence: how clearly the expression is readable (0-100)
 
-UNDERLYING HEALTH INDICATORS (analyze even for neutral faces):
-Look for visible signs of:
-- Sleep deprivation: dark circles, puffy eyes, drooping eyelids
-- Dehydration: dry/cracked lips, sunken eyes
-- Stress/tension: jaw clenching, forehead lines, furrowed brow
-- Fatigue: pale complexion, glazed eyes, slack facial muscles
-- Skin health: acne (stress-related), redness, pallor
+VISIBLE HEALTH INDICATORS (always — even for neutral faces):
+Look carefully for:
+- Sleep deprivation: dark under-eye circles, puffiness, drooping eyelids, glazed eyes
+- Dehydration: dry or cracked lips, sunken eyes, dull skin tone
+- Stress/tension: jaw clenching, temple tension, deep forehead furrows, tight mouth corners
+- Fatigue: pale or ashen complexion, slack facial muscles, half-closed eyes
+- Eye health: visible redness, conjunctival pallor, asymmetric eye opening (ptosis), swelling
+- Skin signals: flushing (stress/fever), pallor (anaemia/anxiety), jaundice tint (yellowish hue), stress acne
+- Emotional numbing: flat affect, reduced micro-expressions (relevant for depression/PTSD)
+
+Populate health_flags with applicable strings from this list:
+["dark_circles", "eye_puffiness", "dry_lips", "glazed_eyes", "tension_lines", "jaw_clenching",
+ "pale_complexion", "flushed_skin", "red_eyes", "eye_asymmetry", "ptosis", "stress_acne",
+ "sunken_eyes", "flat_affect", "jaundice_tint", "conjunctival_pallor", "eye_redness",
+ "forehead_tension", "nasolabial_deepening", "lip_compression"]
+
+${postureAnalysisSection}
 
 Return a JSON object with these fields:
-- mood: one of the 7 emotions above
-- confidence: number 0-100
-- description: one sentence describing the emotional state AND any visible health signs
-- wellness_tip: one actionable wellness suggestion based on BOTH the detected emotion AND any health indicators
-- health_flags: array of strings listing any underlying health observations (e.g., ["dark_circles", "tension_lines", "dry_lips"])
+{
+  "mood": string (one of the 12 emotions above),
+  "confidence": number (0-100),
+  "description": string (2 sentences: describe emotional state AND any notable health or posture signals),
+  "wellness_tip": string (one specific actionable suggestion based on detected mood + health + posture flags combined),
+  "health_flags": string[] (visible health indicators),
+  "posture_score": number | null (0-100 or null if not in posture mode),
+  "posture_flags": string[] (posture indicators or [] if not in posture mode),
+  "posture_tip": string | null (specific posture correction exercise or null if not in posture mode)
+}
 
 Return ONLY valid JSON, no markdown, no explanation.${augmentNote}`
           },
@@ -67,13 +97,13 @@ Return ONLY valid JSON, no markdown, no explanation.${augmentNote}`
             content: [
               {
                 type: "image_url",
-                image_url: {
-                  url: `data:image/jpeg;base64,${imageBase64}`
-                }
+                image_url: { url: `data:image/jpeg;base64,${imageBase64}` }
               },
               {
                 type: "text",
-                text: "Analyze this face for emotional state and any visible health indicators. Be thorough even if the expression appears neutral."
+                text: postureMode
+                  ? "Analyze this image for: (1) facial emotional state, (2) visible health indicators, and (3) body posture including neck, shoulder, and spine alignment. Be thorough."
+                  : "Analyze this face for emotional state and any visible health indicators. Be thorough even if the expression appears neutral."
               }
             ]
           }
@@ -99,7 +129,7 @@ Return ONLY valid JSON, no markdown, no explanation.${augmentNote}`
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
-    
+
     let result;
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -110,12 +140,18 @@ Return ONLY valid JSON, no markdown, no explanation.${augmentNote}`
         confidence: 50,
         description: "Could not clearly analyze the expression",
         wellness_tip: "Try a quick breathing exercise to center yourself",
-        health_flags: []
+        health_flags: [],
+        posture_score: null,
+        posture_flags: [],
+        posture_tip: null,
       };
     }
 
-    // Ensure health_flags exists
+    // Ensure all fields exist
     if (!result.health_flags) result.health_flags = [];
+    if (!result.posture_flags) result.posture_flags = [];
+    if (result.posture_score === undefined) result.posture_score = null;
+    if (result.posture_tip === undefined) result.posture_tip = null;
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
