@@ -64,7 +64,7 @@ serve(async (req) => {
 
       if (lastUserMsg.trim()) {
         try {
-          // Generate embedding for the user message
+          // Generate 768-dim embedding for the user message
           const embedResponse = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_API_KEY}`,
             {
@@ -74,7 +74,8 @@ serve(async (req) => {
                 model: 'models/gemini-embedding-001',
                 content: {
                   parts: [{ text: lastUserMsg }]
-                }
+                },
+                outputDimensionality: 768
               })
             }
           );
