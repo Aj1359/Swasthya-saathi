@@ -303,18 +303,19 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
       }
 
       setMessages(prev => [...prev, { role: 'assistant', content: assistantContent }]);
-    } catch (err) {
-      console.error('Error in sendMessage:', err);
-    }
-
-
-      if (assistantContent) { saveMessage('assistant', assistantContent); speak(assistantContent); updateDashboardFromChat(assistantContent); }
+      if (assistantContent) {
+        saveMessage('assistant', assistantContent);
+        speak(assistantContent);
+        updateDashboardFromChat(assistantContent);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       const errMsg = "I'm sorry, I couldn't respond right now. Please try again 💚";
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
       saveMessage('assistant', errMsg);
-    } finally { setIsLoading(false); }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const clearChat = async () => {
