@@ -3,7 +3,7 @@ services:
   - type: web
     name: swasthya-saathi-backend
     env: docker
-    dockercontext: backend
+    dockercontext: .
     dockerfilePath: backend/Dockerfile
     plan: free
     healthCheckPath: /actuator/health
