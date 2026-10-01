@@ -6,7 +6,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "chat_messages", schema = "public")
+@Table(name = "chat_messages", schema = "public", indexes = {
+    @Index(name = "idx_chat_messages_session_created", columnList = "session_id, created_at DESC"),
+    @Index(name = "idx_chat_messages_user_created", columnList = "user_id, created_at DESC")
+})
 @Getter
 @Setter
 @NoArgsConstructor
