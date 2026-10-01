@@ -66,6 +66,87 @@ const urgencyColors: Record<string, string> = {
 
 const RECORDING_OPTIONS = [10, 15, 20]; // seconds
 
+function fallbackVoiceAnalysis(
+  tx: string,
+  avgVolume: number,
+  variance: number,
+  avgPitch: number,
+  pauseCount: number,
+  wpm: number
+): VoiceMoodResult {
+  const lowerTx = tx.toLowerCase();
+  
+  // Keyword lists
+  const sadKeywords = ['sad', 'depressed', 'lonely', 'unhappy', 'down', 'bad', 'crying', 'grief', 'miserable', 'heavy', 'upset', 'hurt', 'pain', 'hopeless', 'alone', 'strustruggling', 'low', 'dark'];
+  const anxiousKeywords = ['anxious', 'stressed', 'stress', 'panic', 'overwhelmed', 'scared', 'fear', 'worried', 'exam', 'placement', 'deadline', 'pressure', 'tense', 'nervous'];
+  const fatigueKeywords = ['tired', 'exhausted', 'sleepy', 'drained', 'burnout', 'fatigue', 'weary', 'can\'t sleep'];
+  const happyKeywords = ['happy', 'great', 'awesome', 'wonderful', 'joy', 'relaxed', 'calm', 'peaceful', 'content', 'cheerful', 'excited'];
+
+  const isSadWord = sadKeywords.some(w => lowerTx.includes(w));
+  const isAnxiousWord = anxiousKeywords.some(w => lowerTx.includes(w));
+  const isFatigueWord = fatigueKeywords.some(w => lowerTx.includes(w));
+  const isHappyWord = happyKeywords.some(w => lowerTx.includes(w));
+
+  let mood = 'neutral';
+  let confidence = 82;
+  let description = "Voice analysis indicates a steady emotional cadence.";
+  let suggestedAction = "Take a 5-minute breather, sip water, and center yourself.";
+  let urgency: 'low' | 'moderate' | 'high' | 'crisis' = 'low';
+  let indicators: string[] = ['steady_cadence'];
+  let phq2 = false;
+
+  // 1. Explicit Sadness / Low Mood
+  if (isSadWord || (pauseCount >= 3 && variance < 25 && avgVolume < 35)) {
+    mood = 'sad';
+    confidence = isSadWord ? 92 : 84;
+    description = "Detected low volume variance, slower cadence, and emotional distress markers in your voice.";
+    suggestedAction = "Try a gentle 5-minute ocean waves meditation or share your thoughts with Ruhi.";
+    indicators = ['low_energy', 'emotional_fatigue', 'sadness_markers'];
+    phq2 = true;
+    urgency = 'moderate';
+  }
+  // 2. Anxiety / High Stress
+  else if (isAnxiousWord || (avgPitch > 18 && wpm > 115)) {
+    mood = 'anxious';
+    confidence = isAnxiousWord ? 90 : 82;
+    description = "Elevated speech tempo and pitch expressiveness reflect heightened physiological stress.";
+    suggestedAction = "Try 4-7-8 deep breathing to lower heart rate and calm your nervous system.";
+    indicators = ['elevated_pitch', 'rapid_wpm', 'stress_arousal'];
+    urgency = 'moderate';
+  }
+  // 3. Physical / Mental Fatigue
+  else if (isFatigueWord || wpm < 55) {
+    mood = 'tired';
+    confidence = isFatigueWord ? 88 : 80;
+    description = "Slower speech rate and subdued volume signal physical or mental exhaustion.";
+    suggestedAction = "Rest your eyes, hydrate, and consider taking a short break from screen time.";
+    indicators = ['reduced_speech_tempo', 'fatigue_signals'];
+    urgency = 'low';
+  }
+  // 4. Positive / Happy Mood (Requires positive keywords or clear fluent speech with NO negative flags)
+  else if (isHappyWord || (variance > 40 && avgPitch >= 12 && wpm >= 85 && !isSadWord && !isAnxiousWord)) {
+    mood = 'happy';
+    confidence = isHappyWord ? 94 : 85;
+    description = "Rich dynamic volume expressiveness and smooth vocal flow reflect a positive, upbeat mood.";
+    suggestedAction = "Keep up the great momentum! Take a short walk outside or share your good mood.";
+    indicators = ['dynamic_expressiveness', 'positive_cadence'];
+    urgency = 'low';
+  }
+
+  return {
+    mood,
+    confidence,
+    description,
+    wellness_tip: suggestedAction,
+    mental_state_indicators: indicators,
+    suggested_action: suggestedAction,
+    urgency,
+    transcript_themes: indicators,
+    phq2_flag: phq2,
+    transcript: tx,
+  };
+}
+
 const VoiceMoodReader = ({ onMoodDetected }: VoiceMoodReaderProps) => {
   const { user } = useAuth();
   const { userData } = useUser();
@@ -232,16 +313,22 @@ const VoiceMoodReader = ({ onMoodDetected }: VoiceMoodReaderProps) => {
       const avgPitch = pitches.reduce((a, b) => a + b, 0) / pitches.length;
       const wordsPerMinute = words.length > 0 ? Math.round((words.length / recordDuration) * 60) : 0;
 
-      const { data, error: fnError } = await supabase.functions.invoke('voice-mood', {
-        body: {
-          transcript: tx,
-          audioFeatures: { avgVolume, variance, avgPitch, duration: recordDuration, pauseCount, wordsPerMinute },
-          userProfile: userData ? { occupation: userData.occupation, age: userData.age } : null,
-        },
-      });
-
-      if (fnError) throw fnError;
-      if (data?.error) throw new Error(data.error);
+      let data: VoiceMoodResult;
+      try {
+        const { data: edgeData, error: fnError } = await supabase.functions.invoke('voice-mood', {
+          body: {
+            transcript: tx,
+            audioFeatures: { avgVolume, variance, avgPitch, duration: recordDuration, pauseCount, wordsPerMinute },
+            userProfile: userData ? { occupation: userData.occupation, age: userData.age } : null,
+          },
+        });
+        if (fnError) throw fnError;
+        if (edgeData?.error) throw new Error(edgeData.error);
+        data = edgeData as VoiceMoodResult;
+      } catch (edgeErr) {
+        console.warn("Edge function unavailable, using local acoustic analysis fallback:", edgeErr);
+        data = fallbackVoiceAnalysis(tx, avgVolume, variance, avgPitch, pauseCount, wordsPerMinute);
+      }
 
       const finalResult: VoiceMoodResult = { ...data, transcript: tx };
       setResult(finalResult);

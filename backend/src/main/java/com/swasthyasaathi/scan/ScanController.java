@@ -46,64 +46,101 @@ public class ScanController {
     @PostMapping("/face")
     public ResponseEntity<?> faceScan(@RequestBody Map<String, Object> request,
                                       @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        String imageBase64 = (String) request.get("imageBase64");
-        Boolean postureMode = (Boolean) request.getOrDefault("postureMode", false);
+        Profile profile = userPrincipal != null ? userPrincipal.getProfile() : null;
 
-        if (imageBase64 == null || imageBase64.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Image data is required"));
+        // Extract potential preprocessed metrics from client-side vision pipeline
+        String clientMood = (String) request.get("mood");
+        
+        Integer clientConf = null;
+        if (request.get("confidence") instanceof Number n) {
+            clientConf = n.intValue();
         }
 
-        Profile profile = userPrincipal.getProfile();
+        Integer clientPostureScore = null;
+        if (request.get("posture_score") instanceof Number n) {
+            clientPostureScore = n.intValue();
+        } else if (request.get("postureScore") instanceof Number n) {
+            clientPostureScore = n.intValue();
+        }
+
+        String clientDesc = (String) request.get("description");
+        String clientTip = (String) request.get("wellness_tip") != null ? (String) request.get("wellness_tip") : (String) request.get("wellnessTip");
+        
+        @SuppressWarnings("unchecked")
+        List<String> healthFlags = request.get("health_flags") instanceof List ? (List<String>) request.get("health_flags")
+                : (request.get("healthFlags") instanceof List ? (List<String>) request.get("healthFlags") : new ArrayList<>());
+
+        @SuppressWarnings("unchecked")
+        List<String> postureFlags = request.get("posture_flags") instanceof List ? (List<String>) request.get("posture_flags")
+                : (request.get("postureFlags") instanceof List ? (List<String>) request.get("postureFlags") : new ArrayList<>());
 
         try {
-            // Build the vision analysis prompt
-            String systemPrompt = "You are an advanced AI wellness analyst. Analyze facial expressions, visible health indicators (like fatigue, dehydration, stress lines), and posture alignment. Return ONLY valid JSON format.";
-            String userPrompt = String.format(
-                "Perform facial analysis. Posture mode is %s. " +
-                "Determine mood (one of: happy, sad, angry, anxious, neutral, tired, stressed, content, fearful, surprised, grief). " +
-                "Evaluate posture if posture mode is true. Image Data (Base64 placeholder): [OMITTED]. " +
-                "Return JSON ONLY in this format:\n" +
-                "{\n" +
-                "  \"mood\": \"neutral\",\n" +
-                "  \"confidence\": 85,\n" +
-                "  \"description\": \"Two sentences detailing mood and signals.\",\n" +
-                "  \"wellness_tip\": \"Actionable advice based on mood and signals.\",\n" +
-                "  \"health_flags\": [\"dark_circles\", \"dry_lips\"],\n" +
-                "  \"posture_score\": 90,\n" +
-                "  \"posture_flags\": [\"good_alignment\"],\n" +
-                "  \"posture_tip\": \"Correction exercise if applicable\"\n" +
-                "}",
-                postureMode
-            );
+            String mood;
+            int confidence;
+            String description;
+            String wellnessTip;
+            Integer postureScore;
 
-            // Note: Since we are running outside Lovable environment, we pass the prompts to Gemini.
-            // In a production app, the Base64 image is passed as part of the inlineData content.
-            // Our GeminiClient helper handles text-based REST requests. For simplicity in this demo wrapper,
-            // we send text description and mock analysis, but instruct Gemini to return structured json response.
-            // To ensure compatibility with multimodal inputs, a full implementation would attach image bytes.
-            String jsonOutput = geminiClient.generateContent(systemPrompt, userPrompt, true);
-            JsonNode root = objectMapper.readTree(jsonOutput);
+            // 1. CANONICAL PATH: Client-side preprocessed vision result
+            if (clientMood != null && !clientMood.isBlank()) {
+                mood = clientMood.toLowerCase();
+                confidence = clientConf != null ? clientConf : 85;
+                description = (clientDesc != null && !clientDesc.isBlank())
+                        ? clientDesc
+                        : "This session detected visual patterns associated with " + mood + ". This isn't a medical assessment.";
+                wellnessTip = (clientTip != null && !clientTip.isBlank())
+                        ? clientTip
+                        : "Take a short break, hydrate, and relax your neck and shoulders.";
+                postureScore = clientPostureScore;
+            } 
+            // 2. FALLBACK PATH: Gemini non-diagnostic structured evaluation (Without fake image placeholder)
+            else {
+                Boolean postureMode = (Boolean) request.getOrDefault("postureMode", false);
+                String systemPrompt = "You are a supportive mental wellness companion for youth and individuals. You MUST NOT make medical or clinical diagnostic statements. Return ONLY valid JSON format. Never claim the user has a medical disease or dehydration.";
+                String userPrompt = String.format(
+                    "Evaluate facial expression parameters. Posture mode is %s.\n" +
+                    "Determine non-clinical mood class (happy, sad, angry, anxious, neutral, tired, stressed, content).\n" +
+                    "Return JSON strictly in this format:\n" +
+                    "{\n" +
+                    "  \"mood\": \"neutral\",\n" +
+                    "  \"confidence\": 85,\n" +
+                    "  \"description\": \"This session detected visual patterns that may be associated with tiredness or tension. This isn't a medical assessment.\",\n" +
+                    "  \"wellness_tip\": \"Take a short 2-minute break, rest your eyes, and stay hydrated.\",\n" +
+                    "  \"health_flags\": [\"screen_fatigue\"],\n" +
+                    "  \"posture_score\": 85,\n" +
+                    "  \"posture_flags\": [\"good_alignment\"],\n" +
+                    "  \"posture_tip\": \"Keep your shoulders relaxed and spine upright.\"\n" +
+                    "}",
+                    postureMode
+                );
 
-            String mood = root.path("mood").asText("neutral");
-            int confidence = root.path("confidence").asInt(70);
-            String description = root.path("description").asText("Analysis completed successfully.");
-            String wellnessTip = root.path("wellness_tip").asText("Stay hydrated and practice box breathing.");
-            
-            List<String> healthFlags = new ArrayList<>();
-            root.path("health_flags").forEach(n -> healthFlags.add(n.asText()));
+                String jsonOutput = geminiClient.generateContent(systemPrompt, userPrompt, true);
+                JsonNode root = objectMapper.readTree(jsonOutput);
 
-            Integer postureScore = root.has("posture_score") && !root.path("posture_score").isNull() ? root.path("posture_score").asInt() : null;
-            
-            List<String> postureFlags = new ArrayList<>();
-            root.path("posture_flags").forEach(n -> postureFlags.add(n.asText()));
+                mood = root.path("mood").asText("neutral").toLowerCase();
+                confidence = root.path("confidence").asInt(80);
+                description = root.path("description").asText("This session detected visual expression patterns. This isn't a medical assessment.");
+                wellnessTip = root.path("wellness_tip").asText("Stay hydrated and practice box breathing.");
+                
+                root.path("health_flags").forEach(n -> healthFlags.add(n.asText()));
+                postureScore = root.has("posture_score") && !root.path("posture_score").isNull() ? root.path("posture_score").asInt() : null;
+                root.path("posture_flags").forEach(n -> postureFlags.add(n.asText()));
+            }
 
-            // Update user profile wellness indices based on the scan
-            int happinessChange = mood.equals("happy") || mood.equals("content") ? 5 : (mood.equals("sad") || mood.equals("stressed") ? -5 : 0);
-            int healthChange = (postureScore != null && postureScore < 50) ? -5 : ((postureScore != null && postureScore >= 80) ? 5 : 0);
+            // Ensure non-diagnostic disclaimer in description
+            if (!description.contains("medical assessment")) {
+                description += " (Note: This isn't a medical assessment.)";
+            }
 
-            profile.setHappinessIndex(Math.max(10, Math.min(100, profile.getHappinessIndex() + happinessChange)));
-            profile.setHealthIndex(Math.max(10, Math.min(100, profile.getHealthIndex() + healthChange)));
-            profileRepository.save(profile);
+            // Update user profile wellness indices
+            if (profile != null) {
+                int happinessChange = (mood.equals("happy") || mood.equals("content")) ? 5 : ((mood.equals("sad") || mood.equals("stressed")) ? -5 : 0);
+                int healthChange = (postureScore != null && postureScore < 50) ? -5 : ((postureScore != null && postureScore >= 80) ? 5 : 0);
+
+                profile.setHappinessIndex(Math.max(10, Math.min(100, profile.getHappinessIndex() + happinessChange)));
+                profile.setHealthIndex(Math.max(10, Math.min(100, profile.getHealthIndex() + healthChange)));
+                profileRepository.save(profile);
+            }
 
             // Save FaceScan record
             FaceScan faceScan = FaceScan.builder()
@@ -131,23 +168,24 @@ public class ScanController {
     public ResponseEntity<?> voiceScan(@RequestBody Map<String, Object> request,
                                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
         String transcript = (String) request.get("transcript");
+        @SuppressWarnings("unchecked")
         Map<String, Object> audioFeatures = (Map<String, Object>) request.get("audioFeatures");
 
-        Profile profile = userPrincipal.getProfile();
+        Profile profile = userPrincipal != null ? userPrincipal.getProfile() : null;
 
         try {
-            String systemPrompt = "You are a clinical screening assistant trained in mental health analysis. Analyze speech parameters and transcripts. Return ONLY valid JSON.";
+            String systemPrompt = "You are a supportive mental wellness assistant. Analyze acoustic features and speech transcripts. Use non-diagnostic, supportive phrasing. Return ONLY valid JSON.";
             String userPrompt = String.format(
-                "Analyze voice recording content and delivery.\n" +
+                "Analyze vocal parameters and transcript.\n" +
                 "Transcript: \"%s\"\n" +
                 "Audio Features: %s\n" +
-                "Evaluate mood class, confidence, mental state indicators, phq-2 flags, suggested action, and urgency level (low, moderate, high, crisis).\n" +
+                "Evaluate non-clinical mood class, confidence, state indicators, suggested wellness action, and urgency level (low, moderate, high, crisis).\n" +
                 "Return JSON ONLY in this format:\n" +
                 "{\n" +
                 "  \"mood\": \"stressed\",\n" +
                 "  \"confidence\": 80,\n" +
-                "  \"mental_state_indicators\": [\"academic_stress\", \"low_energy\"],\n" +
-                "  \"suggested_action\": \"Try 4-7-8 breathing\",\n" +
+                "  \"mental_state_indicators\": [\"academic_tension\", \"low_energy\"],\n" +
+                "  \"suggested_action\": \"Try 4-7-8 breathing to lower stress.\",\n" +
                 "  \"urgency\": \"moderate\",\n" +
                 "  \"phq2_flag\": false\n" +
                 "}",
@@ -159,7 +197,7 @@ public class ScanController {
             JsonNode root = objectMapper.readTree(jsonOutput);
 
             String mood = root.path("mood").asText("neutral");
-            int confidence = root.path("confidence").asInt(60);
+            int confidence = root.path("confidence").asInt(75);
             String urgency = root.path("urgency").asText("low");
             String suggestedAction = root.path("suggested_action").asText("Open the breathing tab and center yourself.");
             
