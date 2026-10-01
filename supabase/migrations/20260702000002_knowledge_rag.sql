@@ -1,13 +1,26 @@
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
 
--- Add embedding column for 3072 dimensions (gemini-embedding-001)
-ALTER TABLE public.knowledge_documents
-  ADD COLUMN IF NOT EXISTS embedding vector(3072);
+-- Ensure public.knowledge_chunks table exists with vector(768)
+CREATE TABLE IF NOT EXISTS public.knowledge_chunks (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  category         VARCHAR(100),
+  title            VARCHAR(255),
+  content          TEXT NOT NULL,
+  tags             TEXT[],
+  source           VARCHAR(255) NOT NULL,
+  embedding        VECTOR(768),
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
--- Create matching function for vector similarity search
+-- Ensure HNSW index exists on knowledge_chunks embedding for fast cosine similarity lookup
+CREATE INDEX IF NOT EXISTS knowledge_chunks_embedding_hnsw_idx 
+  ON public.knowledge_chunks 
+  USING hnsw (embedding vector_cosine_ops);
+
+-- Create or replace matching function for vector similarity search (768-dim)
 CREATE OR REPLACE FUNCTION public.match_documents(
-  query_embedding vector(3072),
+  query_embedding vector(768),
   match_threshold float,
   match_count int
 )
@@ -25,16 +38,18 @@ AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    kd.id,
-    kd.category,
-    kd.title,
-    kd.content,
-    kd.tags,
-    kd.source,
-    1 - (kd.embedding <=> query_embedding) AS similarity
-  FROM public.knowledge_documents kd
-  WHERE 1 - (kd.embedding <=> query_embedding) > match_threshold
-  ORDER BY kd.embedding <=> query_embedding
+    kc.id,
+    kc.category,
+    kc.title,
+    kc.content,
+    kc.tags,
+    kc.source,
+    1 - (kc.embedding <=> query_embedding) AS similarity
+  FROM public.knowledge_chunks kc
+  WHERE kc.embedding IS NOT NULL
+    AND (1 - (kc.embedding <=> query_embedding)) > match_threshold
+  ORDER BY kc.embedding <=> query_embedding
   LIMIT match_count;
 END;
 $$;
+

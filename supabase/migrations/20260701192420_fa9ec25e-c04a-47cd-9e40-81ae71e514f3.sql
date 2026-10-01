@@ -22,6 +22,7 @@ ALTER TABLE private.journal_entries_enc DROP COLUMN reflection;
 
 REVOKE ALL ON private.journal_entries_enc FROM PUBLIC, anon, authenticated;
 GRANT ALL ON private.journal_entries_enc TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON private.journal_entries_enc TO authenticated;
 
 CREATE OR REPLACE FUNCTION private.journal_encrypt(txt text)
 RETURNS bytea LANGUAGE sql SECURITY DEFINER SET search_path = private, extensions AS $$
@@ -128,6 +129,7 @@ ALTER TABLE private.peer_posts_enc ALTER COLUMN content_enc SET NOT NULL;
 
 REVOKE ALL ON private.peer_posts_enc FROM PUBLIC, anon, authenticated;
 GRANT ALL ON private.peer_posts_enc TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON private.peer_posts_enc TO authenticated, anon;
 
 CREATE OR REPLACE FUNCTION private.peer_posts_encrypt(txt text)
 RETURNS bytea LANGUAGE sql SECURITY DEFINER SET search_path = private, extensions AS $$
@@ -217,6 +219,7 @@ ALTER TABLE private.peer_replies_enc ALTER COLUMN content_enc SET NOT NULL;
 
 REVOKE ALL ON private.peer_replies_enc FROM PUBLIC, anon, authenticated;
 GRANT ALL ON private.peer_replies_enc TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON private.peer_replies_enc TO authenticated, anon;
 
 CREATE OR REPLACE FUNCTION private.peer_replies_encrypt(txt text)
 RETURNS bytea LANGUAGE sql SECURITY DEFINER SET search_path = private, extensions AS $$

@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "knowledge_chunks", schema = "public")
+@Table(name = "knowledge_chunks")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,14 +21,19 @@ public class KnowledgeChunk {
     @Column(nullable = false)
     private String source;
 
+    private String title;
+
+    private String category;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    // Use float[] to map the pgvector type in Hibernate
-    @Column(columnDefinition = "vector(768)")
+    // 768-dimensional embedding vector matching Gemini embedding model output
+    @Column(name = "embedding")
     private float[] embedding;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
 }
+

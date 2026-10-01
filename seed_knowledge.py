@@ -116,7 +116,8 @@ def get_embedding(text, retries=3, delay=1):
         "model": "models/gemini-embedding-001",
         "content": {
             "parts": [{"text": text}]
-        }
+        },
+        "outputDimensionality": 768
     }
     req = urllib.request.Request(
         embed_url,
@@ -154,9 +155,24 @@ def main():
         )
         cur = conn.cursor()
         
-        # Clear existing knowledge documents to prevent duplicates
+        # Ensure knowledge_chunks table exists with vector(768)
+        cur.execute("""
+            CREATE EXTENSION IF NOT EXISTS vector;
+            CREATE TABLE IF NOT EXISTS public.knowledge_chunks (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                category VARCHAR(100),
+                title VARCHAR(255),
+                content TEXT NOT NULL,
+                tags TEXT[],
+                source VARCHAR(255) NOT NULL,
+                embedding VECTOR(768),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        """)
+
+        # Clear existing knowledge chunks to prevent duplicates
         print("Clearing existing records...")
-        cur.execute("DELETE FROM public.knowledge_documents;")
+        cur.execute("DELETE FROM public.knowledge_chunks;")
         
         print(f"Starting seeding of {len(documents)} documents...")
         for i, doc in enumerate(documents):
@@ -170,10 +186,10 @@ def main():
             
             time.sleep(1) # Rate limit delay
             
-            print(f"Inserting into database...")
+            print(f"Inserting into public.knowledge_chunks database...")
             cur.execute(
                 """
-                INSERT INTO public.knowledge_documents (category, title, content, tags, source, embedding)
+                INSERT INTO public.knowledge_chunks (category, title, content, tags, source, embedding)
                 VALUES (%s, %s, %s, %s, %s, %s);
                 """,
                 (doc["category"], doc["title"], doc["content"], doc["tags"], doc["source"], embedding)
@@ -181,7 +197,7 @@ def main():
         
         conn.commit()
         print("Seeding complete! Verifying database records...")
-        cur.execute("SELECT count(*) FROM public.knowledge_documents;")
+        cur.execute("SELECT count(*) FROM public.knowledge_chunks;")
         count = cur.fetchone()[0]
         print(f"Total documents successfully seeded: {count}")
         
@@ -192,3 +208,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
