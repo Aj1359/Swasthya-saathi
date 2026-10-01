@@ -10,23 +10,34 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "vector";
 
--- 1. CHAT MESSAGES INDEXES
-CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id_created_at
-  ON public.chat_messages (session_id, created_at DESC);
-
-CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id_created_at
-  ON public.chat_messages (user_id, created_at DESC);
+-- 1. CHAT MESSAGES INDEXES (Safe execution only if chat_messages is a base table)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+      AND table_name = 'chat_messages' 
+      AND table_type = 'BASE TABLE'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id_created_at ON public.chat_messages (session_id, created_at DESC)';
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id_created_at ON public.chat_messages (user_id, created_at DESC)';
+  END IF;
+END $$;
 
 -- 2. RAG VECTOR HNSW INDEX (768-dim Cosine Similarity Search)
-CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_embedding_hnsw
-  ON public.knowledge_chunks
-  USING hnsw (embedding vector_cosine_ops);
-
-CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_category
-  ON public.knowledge_chunks (category);
-
-CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_source
-  ON public.knowledge_chunks (source);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+      AND table_name = 'knowledge_chunks' 
+      AND table_type = 'BASE TABLE'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_embedding_hnsw ON public.knowledge_chunks USING hnsw (embedding vector_cosine_ops)';
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_category ON public.knowledge_chunks (category)';
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_source ON public.knowledge_chunks (source)';
+  END IF;
+END $$;
 
 -- 3. JOURNAL ENTRIES TABLE & INDEXES
 CREATE TABLE IF NOT EXISTS public.journal_entries (
@@ -54,8 +65,23 @@ CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id_created_at
   ON public.activity_logs (user_id, created_at DESC);
 
 -- 5. PHYSIOLOGICAL SCAN INDEXES
-CREATE INDEX IF NOT EXISTS idx_face_scans_user_id_created_at
-  ON public.face_scans (user_id, created_at DESC);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+      AND table_name = 'face_scans' 
+      AND table_type = 'BASE TABLE'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_face_scans_user_id_created_at ON public.face_scans (user_id, created_at DESC)';
+  END IF;
 
-CREATE INDEX IF NOT EXISTS idx_voice_mood_scans_user_id_created_at
-  ON public.voice_mood_scans (user_id, created_at DESC);
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+      AND table_name = 'voice_mood_scans' 
+      AND table_type = 'BASE TABLE'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_voice_mood_scans_user_id_created_at ON public.voice_mood_scans (user_id, created_at DESC)';
+  END IF;
+END $$;
