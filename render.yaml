@@ -4,7 +4,7 @@ services:
     name: swasthya-saathi-backend
     env: docker
     dockercontext: .
-    dockerfilePath: backend/Dockerfile
+    dockerfilePath: Dockerfile
     plan: free
     healthCheckPath: /actuator/health
     envVars:
