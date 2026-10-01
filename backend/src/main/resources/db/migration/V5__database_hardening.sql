@@ -64,8 +64,17 @@ CREATE TABLE IF NOT EXISTS public.journal_entries (
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_journal_entries_user_id_created_at
-  ON public.journal_entries (user_id, created_at DESC);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+      AND table_name = 'journal_entries' 
+      AND table_type = 'BASE TABLE'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_journal_entries_user_id_created_at ON public.journal_entries (user_id, created_at DESC)';
+  END IF;
+END $$;
 
 -- 4. ACTIVITY LOGS TABLE & INDEXES
 CREATE TABLE IF NOT EXISTS public.activity_logs (
@@ -77,8 +86,17 @@ CREATE TABLE IF NOT EXISTS public.activity_logs (
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id_created_at
-  ON public.activity_logs (user_id, created_at DESC);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+      AND table_name = 'activity_logs' 
+      AND table_type = 'BASE TABLE'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id_created_at ON public.activity_logs (user_id, created_at DESC)';
+  END IF;
+END $$;
 
 -- 5. PHYSIOLOGICAL SCAN INDEXES
 DO $$
