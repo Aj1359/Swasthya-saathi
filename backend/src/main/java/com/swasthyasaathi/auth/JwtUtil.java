@@ -3,6 +3,7 @@ package com.swasthyasaathi.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:}")
     private String secret;
 
     @Value("${jwt.expiration}")
@@ -26,6 +27,16 @@ public class JwtUtil {
 
     @Value("${jwt.refresh-expiration}")
     private long refreshExpiration;
+
+    @PostConstruct
+    public void validateSecret() {
+        if (secret == null || secret.isBlank() || secret.equals("fallback-secret") || secret.contains("your_very_secret_key")) {
+            throw new IllegalStateException("FATAL SECURITY ERROR: JWT_SECRET environment variable is missing or insecure! The application cannot start without a valid JWT_SECRET.");
+        }
+        if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("FATAL SECURITY ERROR: JWT_SECRET must be at least 256 bits (32 bytes) long for HS256 algorithm security.");
+        }
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));

@@ -18,6 +18,9 @@ spring:
     enabled: true
     baseline-on-migrate: true
 
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:8080}
+
 gemini:
   api:
     key: ${GEMINI_API_KEY:}
@@ -27,6 +30,16 @@ gemini:
     generation: gemini-2.5-flash
 
 jwt:
-  secret: ${JWT_SECRET:your_very_secret_key_needs_to_be_at_least_256_bits_long_for_security_reasons_1234567890}
+  secret: ${JWT_SECRET:}
   expiration: 900000 # 15 minutes (in milliseconds)
   refresh-expiration: 604800000 # 7 days (in milliseconds)
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
