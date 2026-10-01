@@ -1,15 +1,16 @@
 # Universal Dockerfile for SwasthyaSaathi Spring Boot Backend on Render
-# Compatible with both Root Context (.) and Backend Context (backend/)
+# Compatible with both Root Context (.) and Backend Subdirectory Context (backend/)
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
-# Copy pom.xml safely regardless of context
-COPY backend/pom.xml* pom.xml ./
+# Copy pom.xml safely using wildcards on all sources
+COPY backend/pom.xml* pom.xml* ./
 RUN if [ -f backend/pom.xml ]; then mv backend/pom.xml ./pom.xml; fi
 
-# Copy src directory safely regardless of context
-COPY backend/src* src ./src_backend/
-RUN if [ -d src_backend/backend/src ]; then mv src_backend/backend/src ./src && rm -rf src_backend; else mv src_backend ./src; fi
+# Copy src directory safely using wildcards on all sources
+COPY backend/src* ./backend_src/
+COPY src* ./direct_src/
+RUN if [ -d backend_src/src ]; then mv backend_src/src ./src; elif [ -d direct_src/src ]; then mv direct_src/src ./src; elif [ -d direct_src ]; then mv direct_src ./src; fi && rm -rf backend_src direct_src
 
 # Build production jar
 RUN mvn clean package -DskipTests
