@@ -12,8 +12,8 @@ COPY backend/src* ./backend_src/
 COPY src* ./direct_src/
 RUN if [ -d backend_src/src ]; then mv backend_src/src ./src; elif [ -d direct_src/src ]; then mv direct_src/src ./src; elif [ -d direct_src ]; then mv direct_src ./src; fi && rm -rf backend_src direct_src
 
-# Build production jar
-RUN mvn clean package -DskipTests
+# Build production jar in non-interactive batch mode
+RUN mvn clean package -DskipTests -B -ntp
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
