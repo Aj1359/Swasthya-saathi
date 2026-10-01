@@ -34,8 +34,24 @@ BEGIN
       AND table_type = 'BASE TABLE'
   ) THEN
     EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_embedding_hnsw ON public.knowledge_chunks USING hnsw (embedding vector_cosine_ops)';
-    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_category ON public.knowledge_chunks (category)';
-    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_source ON public.knowledge_chunks (source)';
+
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+        AND table_name = 'knowledge_chunks' 
+        AND column_name = 'category'
+    ) THEN
+      EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_category ON public.knowledge_chunks (category)';
+    END IF;
+
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+        AND table_name = 'knowledge_chunks' 
+        AND column_name = 'source'
+    ) THEN
+      EXECUTE 'CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_source ON public.knowledge_chunks (source)';
+    END IF;
   END IF;
 END $$;
 
