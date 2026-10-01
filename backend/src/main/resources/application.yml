@@ -1,6 +1,9 @@
 server:
   port: 8081
 
+app:
+  service-url: ${RENDER_EXTERNAL_URL:http://localhost:8081}
+
 spring:
   application:
     name: swasthya-saathi-backend
