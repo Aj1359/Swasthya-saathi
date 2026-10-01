@@ -1,16 +1,22 @@
-# Universal Dockerfile for SwasthyaSaathi Spring Boot Backend on Render
-# Compatible with both Root Context (.) and Backend Subdirectory Context (backend/)
+# Multi-stage Docker build for SwasthyaSaathi Spring Boot Backend on Render
+# Automatically detects Root Context (.) vs Backend Context (backend/) using main/java signature
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
-# Copy pom.xml safely using wildcards on all sources
-COPY backend/pom.xml* pom.xml* ./
-RUN if [ -f backend/pom.xml ]; then mv backend/pom.xml ./pom.xml; fi
+# Copy context into temporary folder to locate Java backend sources
+COPY . /tmp_repo/
 
-# Copy src directory safely using wildcards on all sources
-COPY backend/src* ./backend_src/
-COPY src* ./direct_src/
-RUN if [ -d backend_src/src ]; then mv backend_src/src ./src; elif [ -d direct_src/src ]; then mv direct_src/src ./src; elif [ -d direct_src ]; then mv direct_src ./src; fi && rm -rf backend_src direct_src
+# Check for Java backend source signature (src/main/java)
+RUN if [ -d /tmp_repo/backend/src/main/java ]; then \
+      cp -r /tmp_repo/backend/src ./src && \
+      cp /tmp_repo/backend/pom.xml ./pom.xml; \
+    elif [ -d /tmp_repo/src/main/java ]; then \
+      cp -r /tmp_repo/src ./src && \
+      cp /tmp_repo/pom.xml ./pom.xml; \
+    else \
+      echo "ERROR: Java backend source files not found!" && exit 1; \
+    fi && \
+    rm -rf /tmp_repo
 
 # Build production jar in non-interactive batch mode
 RUN mvn clean package -DskipTests -B -ntp
