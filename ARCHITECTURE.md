@@ -11,28 +11,51 @@
 │  │ Landing  │ │   Auth   │ │Onboarding│ │Dashboard │ │ History  │ │
 │  └──────────┘ └──────────┘ └──────────┘ └────┬─────┘ └──────────┘ │
 │                                               │                      │
-│  Dashboard Components:                        │                      │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────┴─────┐              │
-│  │Happiness │ │ Health   │ │ Wellness │ │ Crisis   │              │
-│  │  Card    │ │  Card    │ │  Chart   │ │ Support  │              │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘              │
-│                                                                      │
-│  Feature Tabs:                                                       │
+│  Feature Tabs & Modals:                                              │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐              │
 │  │Meditation│ │Yoga+Video│ │Breathing │ │Books/PDF │              │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘              │
 │                                                                      │
 │  Floating: Daily Tracker | Ruhi Chat | Profile Menu                  │
-│  Special: Face Mood Reader | Mood Journal | Peer Support | Student   │
-└─────────────────────────────────────────────────────────────────────┘
+│  Sensing: Face Mood Reader | Voice Reader | Posture Detector         │
+└──────────────────────────────────┬──────────────────────────────────┘
                                    │
                                    ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                       BACKEND (Lovable Cloud)                        │
+│               SPRING BOOT BACKEND MICROSERVICE                      │
 ├─────────────────────────────────────────────────────────────────────┤
-│  Edge Functions:                                                     │
-│  ┌──────────────────┐  ┌──────────────────┐                        │
-│  │  ruhi-chat        │  │  face-mood        │                        │
+│  REST API Layer:                                                     │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  POST /api/chat -> ChatController                             │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│                                 │                                   │
+│  Chat Service Orchestrator (ChatService):                            │
+│  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐    │
+│  │   1. SAFETY      │ │    2. CONTEXT    │ │     3. RAG       │    │
+│  │ Crisis Detection │ │ Profile, Scans,  │ │ 768-dim pgvector │    │
+│  │ Helplines (14416)│ │ Session History  │ │ Cosine Search    │    │
+│  └─────────┬────────┘ └────────┬─────────┘ └────────┬─────────┘    │
+│            └───────────────────┼────────────────────┘              │
+│                                ▼                                    │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │   4. GEMINI SYNTHESIS -> GeminiClient (gemini-2.5-flash)       │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│                                 │                                   │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │   5. PERSISTENCE -> PostgreSQL (ChatMessage, Profile Activity)│  │
+│  └───────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     DATABASE & STORAGE (PostgreSQL)                  │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐      │
+│  │  profiles   │ │chat_messages│ │face_scans  │ │knowledge_  │      │
+│  │  journal_   │ │peer_posts  │ │voice_scans │ │  chunks    │      │
+│  │  entries    │ │            │ │            │ │(vector-768)│      │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘      │
+└─────────────────────────────────────────────────────────────────────┘
+```��  │  ruhi-chat        │  │  face-mood        │                        │
 │  │  AI conversation  │  │  Facial analysis  │                        │
 │  │  SSE streaming    │  │  Mood detection   │                        │
 │  └──────────────────┘  └──────────────────┘                        │
