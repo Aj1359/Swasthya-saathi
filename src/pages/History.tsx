@@ -32,32 +32,49 @@ const History = () => {
   const [journals, setJournals] = useState<JournalEntryRow[]>([]);
 
   const loadHistory = useCallback(async () => {
-    if (!user) return;
+    // 1. Load LocalStorage journal entries
+    const localDict = JSON.parse(localStorage.getItem('swasthyasaathi_journal') || '{}');
+    const localJournals: JournalEntryRow[] = Object.values(localDict).map((item: any) => ({
+      id: item.id || crypto.randomUUID(),
+      user_id: user?.id || 'guest',
+      mood: item.mood || 3,
+      reflection: item.reflection || '',
+      created_at: item.created_at || new Date(item.timestamp || Date.now()).toISOString(),
+    }));
 
-    const [chats, scans, acts, jrnls] = await Promise.all([
-      supabase.from('chat_messages').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(100),
-      supabase.from('face_scans').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
-      supabase.from('activity_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
-      supabase.from('journal_entries').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
-    ]);
+    if (user) {
+      const [chats, scans, acts, jrnls] = await Promise.all([
+        supabase.from('chat_messages').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(100),
+        supabase.from('face_scans').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
+        supabase.from('activity_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
+        supabase.from('journal_entries').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
+      ]);
 
-    if (chats.data) {
-      // Group by session
-      const sessions: Record<string, ChatMessageRow[]> = {};
-      chats.data.forEach((m) => {
-        if (!sessions[m.session_id]) sessions[m.session_id] = [];
-        sessions[m.session_id].push(m);
+      if (chats.data) {
+        const sessions: Record<string, ChatMessageRow[]> = {};
+        chats.data.forEach((m) => {
+          if (!sessions[m.session_id]) sessions[m.session_id] = [];
+          sessions[m.session_id].push(m);
+        });
+        setChatSessions(Object.entries(sessions).map(([id, msgs]) => ({
+          id,
+          messageCount: msgs.length,
+          lastMessage: msgs[0]?.content?.slice(0, 80),
+          date: msgs[0]?.created_at,
+        })));
+      }
+      if (scans.data) setFaceScans(scans.data);
+      if (acts.data) setActivities(acts.data);
+
+      const dbJournals = jrnls.data || [];
+      const map = new Map<string, JournalEntryRow>();
+      [...dbJournals, ...localJournals].forEach((j) => {
+        if (j.id && j.reflection) map.set(j.id, j);
       });
-      setChatSessions(Object.entries(sessions).map(([id, msgs]) => ({
-        id,
-        messageCount: msgs.length,
-        lastMessage: msgs[0]?.content?.slice(0, 80),
-        date: msgs[0]?.created_at,
-      })));
+      setJournals(Array.from(map.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    } else {
+      setJournals(localJournals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     }
-    if (scans.data) setFaceScans(scans.data);
-    if (acts.data) setActivities(acts.data);
-    if (jrnls.data) setJournals(jrnls.data);
   }, [user]);
 
   useEffect(() => {
