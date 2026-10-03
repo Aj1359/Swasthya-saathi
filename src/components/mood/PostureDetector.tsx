@@ -180,10 +180,13 @@ const PostureDetector = ({ onPostureDetected }: PostureDetectorProps) => {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: 640, height: 480 },
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
       });
       streamRef.current = stream;
-      videoRef.current.srcObject = stream;
+
+      const video = videoRef.current;
+      video.srcObject = stream;
+      await video.play().catch(() => {});
 
       const win = window as unknown as {
         Pose?: new (config: { locateFile: (file: string) => string }) => {
@@ -221,12 +224,21 @@ const PostureDetector = ({ onPostureDetected }: PostureDetectorProps) => {
         const ctx = canvas?.getContext('2d');
         if (!canvas || !ctx) return;
 
-        canvas.width = results.image.width;
-        canvas.height = results.image.height;
+        const w = results.image?.width || video.videoWidth || 640;
+        const h = results.image?.height || video.videoHeight || 480;
+
+        canvas.width = w;
+        canvas.height = h;
         ctx.save();
         ctx.scale(-1, 1); // mirror
         ctx.translate(-canvas.width, 0);
-        ctx.drawImage(results.image as unknown as CanvasImageSource, 0, 0);
+
+        if (results.image) {
+          ctx.drawImage(results.image as unknown as CanvasImageSource, 0, 0, w, h);
+        } else if (video && video.readyState >= 2) {
+          ctx.drawImage(video, 0, 0, w, h);
+        }
+
         ctx.restore();
 
         if (results.poseLandmarks) {
@@ -236,7 +248,6 @@ const PostureDetector = ({ onPostureDetected }: PostureDetectorProps) => {
           const poseConn = win.POSE_CONNECTIONS;
 
           if (drawConn && poseConn) {
-            // Mirror: flip X for each landmark before drawing
             const mirrored = results.poseLandmarks.map((l) => ({ ...l, x: 1 - l.x }));
             ctx.save();
             drawConn(ctx, mirrored, poseConn, { color: 'rgba(99,102,241,0.7)', lineWidth: 2 });
@@ -244,7 +255,6 @@ const PostureDetector = ({ onPostureDetected }: PostureDetectorProps) => {
             ctx.restore();
           }
 
-          // Analyse
           const analyzed = analyzePosture(results.poseLandmarks);
           setLiveScore(analyzed.score);
           lastResultsRef.current.push(analyzed);
@@ -252,12 +262,16 @@ const PostureDetector = ({ onPostureDetected }: PostureDetectorProps) => {
         }
       });
 
-      const camera = new win.Camera(videoRef.current, {
-        onFrame: async () => { await pose.send({ image: videoRef.current! }); },
+      const camera = new win.Camera(video, {
+        onFrame: async () => {
+          if (video && video.readyState >= 2) {
+            await pose.send({ image: video });
+          }
+        },
         width: 640, height: 480,
       });
       cameraRef.current = camera;
-      camera.start();
+      await camera.start();
 
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
