@@ -2,6 +2,8 @@ package com.swasthyasaathi.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -29,11 +31,11 @@ public class KnowledgeChunk {
     private String content;
 
     // 768-dimensional embedding vector matching Gemini embedding model output
-    @Column(name = "embedding")
+    @JdbcTypeCode(SqlTypes.OTHER)
+    @Column(name = "embedding", columnDefinition = "vector(768)")
     private float[] embedding;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
 }
-
