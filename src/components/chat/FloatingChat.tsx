@@ -15,10 +15,6 @@ interface Message {
   content: string;
 }
 
-// We use supabase.functions.invoke instead of raw fetch — it attaches the user's JWT automatically.
-// CHAT_URL kept as fallback for streaming (supabase SDK doesn't yet stream).
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ruhi-chat`;
-
 const getSessionId = () => {
   let id = localStorage.getItem('swasthyasaathi_session_id');
   if (!id) { id = crypto.randomUUID(); localStorage.setItem('swasthyasaathi_session_id', id); }
@@ -29,7 +25,6 @@ function generateRuhiLocalResponse(messages: Message[]): string {
   const lastMsg = messages[messages.length - 1]?.content || '';
   const historyText = messages.map(m => m.content.toLowerCase()).join(' ');
 
-  // 1. Normalize typos and common slang
   const normalized = lastMsg.toLowerCase()
     .replace(/streesed|stresed|stresd|strssed|stres/g, 'stressed')
     .replace(/timorrow|tomorow|tmrw|tomorrw/g, 'tomorrow')
@@ -38,15 +33,12 @@ function generateRuhiLocalResponse(messages: Message[]): string {
     .replace(/homesik|homesk/g, 'homesick')
     .replace(/lonley|lonly/g, 'lonely');
 
-  // Detect conversation topics from last message OR history
   const isInterview = normalized.includes('interview') || historyText.includes('interview');
   const isPlacement = normalized.includes('placement') || historyText.includes('placement');
   const isExam = normalized.includes('exam') || historyText.includes('exam');
   const isStress = normalized.includes('stressed') || normalized.includes('anxious') || normalized.includes('worried') || historyText.includes('stress');
   const isHomesick = normalized.includes('homesick') || historyText.includes('homesick');
   const isUncertain = normalized.includes('dont know') || normalized.includes("don't know") || normalized.includes('confused') || normalized.includes('lost') || normalized.includes('help');
-  const isSad = normalized.includes('sad') || normalized.includes('down') || normalized.includes('depressed') || normalized.includes('lonely');
-  const isPain = normalized.includes('pain') || normalized.includes('headache') || normalized.includes('back');
 
   const assistantTurnCount = messages.filter(m => m.role === 'assistant').length;
 
@@ -60,43 +52,22 @@ function generateRuhiLocalResponse(messages: Message[]): string {
     }
   }
 
-  if (isPlacement || isExam || isStress) {
-    if (assistantTurnCount <= 1) {
-      return "Placement & exam stress is so real right now 🎢 It's totally valid to feel overwhelmed. Is it a specific company/subject, or just the uncertainty of it all?";
-    } else if (isUncertain || assistantTurnCount === 2) {
-      return "Break your prep into tiny 15-minute chunks instead of looking at the whole mountain. After each chunk, step away for 3 minutes. Have you tried the Box Breathing tool in our app yet? 🧘‍♂️";
-    } else {
-      return "One day at a time, yaar. You've prepared more than you realize. I'm right here with you whenever you need a quick reset 💚";
-    }
-  }
-
   if (isHomesick) {
-    return "Homesickness hits so hard, especially during busy college weeks 🏠 Have you had a chance to call home or talk to someone close today?";
+    return "Missing home is so valid 🏡. It just means you have a place full of love to miss. Call a family member or friend for 5 minutes, or eat a cozy comfort meal today. What usually makes you feel a bit warmer when you're away?";
   }
 
-  if (isSad) {
-    return "I'm really sorry things feel heavy right now 💚 You don't have to carry it all by yourself. Do you want to vent about it, or would you prefer a quick distraction?";
+  if (isExam || isStress) {
+    return "Take a slow, deep breath in... and let it out. 🌬️ When stress builds up, breaking things down into tiny 15-minute steps helps. What's one small thing we can tackle right now?";
   }
 
-  if (isPain) {
-    return "Physical pain from long study hours is so draining 💆‍♂️ Try doing a quick shoulder roll and check out the Yoga tab in the app for posture stretches!";
-  }
-
-  const generalResponses = [
-    "I hear you 💚 It's totally okay to feel uncertain sometimes. Tell me a bit more about what's on your mind.",
-    "Take a slow breath with me 🌿 When everything feels messy, picking just ONE small thing to do right now can help. What's one tiny step you can take today?",
-    "I'm here with you all the way! Remember to be kind to yourself — you're doing the best you can 💪"
-  ];
-
-  return generalResponses[(assistantTurnCount - 1) % generalResponses.length];
+  return "I hear you 💚. It takes courage to open up about how you're feeling. I'm right here with you — tell me a bit more about what's on your mind?";
 }
 
 interface FloatingChatProps {
   initialMessage?: string;
-  onMessageSent?: () => void;
 }
 
-const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
+export function FloatingChat({ initialMessage }: FloatingChatProps) {
   const { userData, updateIndices } = useUser();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -108,13 +79,13 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [historyLoaded, setHistoryLoaded] = useState(false);
-  const [hasMemory, setHasMemory] = useState(false); // true when prior session messages were found
+  const [hasMemory, setHasMemory] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
   const sessionId = useRef(getSessionId());
 
-  // Preload speech synthesis voices for sweet female voice selection
+  // Preload speech synthesis voices
   useEffect(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
@@ -124,7 +95,6 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
     }
   }, []);
 
-  // Open and pre-fill if 'Send to Ruhi' was triggered from a scan result
   useEffect(() => {
     if (initialMessage && initialMessage.trim()) {
       setInput(initialMessage);
@@ -132,7 +102,6 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
     }
   }, [initialMessage]);
 
-  // Open chat if navigated with ?chat=SESSION_ID
   useEffect(() => {
     const chatParam = searchParams.get('chat');
     if (chatParam) {
@@ -143,7 +112,6 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
-
 
   const getGreeting = useCallback(() => {
     if (!userData) return "Hey! I'm Ruhi 💚";
@@ -184,11 +152,6 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
     }
   }, [isOpen, historyLoaded, user, userData, getGreeting, saveMessage]);
 
-  const getActivityContext = () => { const d = localStorage.getItem('swasthyasaathi_daily'); return d ? JSON.parse(d) : null; };
-  const getJournalContext = () => { const s = localStorage.getItem('swasthyasaathi_journal'); if (!s) return []; return Object.values(JSON.parse(s)).sort((a: unknown, b: unknown) => (b as { timestamp: number }).timestamp - (a as { timestamp: number }).timestamp).slice(0, 5); };
-  const getFaceScanData = () => { const s = localStorage.getItem('swasthyasaathi_face_scan'); return s ? JSON.parse(s) : null; };
-  const getFaceScanHistory = () => { const s = localStorage.getItem('swasthyasaathi_face_history'); return s ? JSON.parse(s).slice(-7) : []; };
-
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
   useEffect(() => { if (isOpen) inputRef.current?.focus(); }, [isOpen]);
 
@@ -198,7 +161,7 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
         lang: string;
         interimResults: boolean;
         continuous: boolean;
-        onresult: (e: { results: Iterable<ArrayLike<{ transcript: string }>> }) => void;
+        onresult: (e: { results: Array<Array<{ transcript: string }>> }) => void;
         onend: () => void;
         onerror: () => void;
         start: () => void;
@@ -208,7 +171,7 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
         lang: string;
         interimResults: boolean;
         continuous: boolean;
-        onresult: (e: { results: Iterable<ArrayLike<{ transcript: string }>> }) => void;
+        onresult: (e: { results: Array<Array<{ transcript: string }>> }) => void;
         onend: () => void;
         onerror: () => void;
         start: () => void;
@@ -228,26 +191,38 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
   const speak = useCallback((text: string) => {
     if (!voiceEnabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    const cleaned = text.replace(/[#*_~`>|]/g, '').replace(/\[.*?\]\(.*?\)/g, '').replace(/\p{Extended_Pictographic}/gu, '');
+    
+    // Clean markdown formatting and emojis for clean speech output
+    const cleaned = text
+      .replace(/[#*_~`>|]/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/\p{Extended_Pictographic}/gu, '');
+
+    if (!cleaned.trim()) return;
+
     const u = new SpeechSynthesisUtterance(cleaned);
-    u.lang = 'en-IN';
-    u.rate = 0.93; // Soft, warm speech tempo
-    u.pitch = 1.25; // Sweet, friendly female pitch
+    u.rate = 1.0;
+    u.pitch = 1.1;
 
     const voices = window.speechSynthesis.getVoices();
     if (voices && voices.length > 0) {
-      const indianFemale = voices.find(v => 
+      const selectedVoice = voices.find(v => 
         (v.lang.toLowerCase().includes('in')) && 
         (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('neerja') || v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('veena') || v.name.toLowerCase().includes('geeta'))
       ) || voices.find(v => v.lang.toLowerCase().includes('in'))
-        || voices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('samantha'));
+        || voices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('samantha'))
+        || voices[0];
       
-      if (indianFemale) u.voice = indianFemale;
+      if (selectedVoice) {
+        u.voice = selectedVoice;
+        u.lang = selectedVoice.lang;
+      }
     }
 
     u.onstart = () => setIsSpeaking(true);
     u.onend = () => setIsSpeaking(false);
-    u.onerror = () => setIsSpeaking(false);
+    u.onerror = (e) => { console.warn('TTS error:', e); setIsSpeaking(false); };
+    
     window.speechSynthesis.speak(u);
   }, [voiceEnabled]);
 
@@ -257,9 +232,7 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
     if (!userData) return;
     const l = content.toLowerCase();
     let hd = 0, hed = 0;
-    // Positive signals (Ruhi affirming)
     if (/\b(great job|proud of you|awesome|well done|that's wonderful)\b/.test(l)) hd += 2;
-    // Only deduct if not in a negation context
     if (/\b(stressed|overwhelmed|anxious|hopeless)\b/.test(l) && !/\b(not|no longer|less|better|feeling good)\b/.test(l)) hd -= 1;
     if (/\b(meditation|yoga|breathing exercise|pranayama)\b/.test(l)) hed += 1;
     if (hd !== 0 || hed !== 0) {
@@ -279,9 +252,9 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
     let assistantContent = '';
 
     try {
-      // Single Canonical Chat Architecture: Primary dispatch to Spring Boot Chat API orchestrator
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL ? `${import.meta.env.VITE_BACKEND_URL}/api/chat` : 'http://localhost:8081/api/chat';
+        const backendBase = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || 'https://swasthya-saathi-backend-sbme.onrender.com';
+        const backendUrl = `${backendBase}/api/chat`;
         const response = await fetch(backendUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -296,7 +269,6 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
         console.warn('Spring Boot Chat API unreachable, activating local safety engine fallback:', backendErr);
       }
 
-      // If backend is offline or unreachable, use intelligent Ruhi client safety response engine
       if (!assistantContent) {
         const allMsgs = [...messages, userMessage];
         assistantContent = generateRuhiLocalResponse(allMsgs);
@@ -332,7 +304,6 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
 
   return (
     <>
-      {/* Floating button - positioned above bottom nav on mobile */}
       {!isOpen && (
         <button onClick={() => setIsOpen(true)} className="fixed z-50 group" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 5.5rem)', right: '1rem', width: 52, height: 52 }}>
           <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
@@ -391,12 +362,22 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
                       <img src={logo} alt="Ruhi" className="w-full h-full object-cover" />
                     </div>
                   )}
-                  <div className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                  <div className={`max-w-[80%] px-4 py-3 rounded-2xl relative group ${
                     msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted text-foreground rounded-bl-md'
                   }`}>
                     <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
+                    {msg.role === 'assistant' && (
+                      <button
+                        onClick={() => speak(msg.content)}
+                        className="mt-1 text-xs opacity-60 hover:opacity-100 flex items-center gap-1 text-muted-foreground hover:text-primary transition-opacity"
+                        title="Listen to message"
+                      >
+                        <Volume2 className="w-3 h-3" />
+                        <span>Listen</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -418,49 +399,46 @@ const FloatingChat = ({ initialMessage, onMessageSent }: FloatingChatProps) => {
             <div className="px-4 py-2 flex gap-2 overflow-x-auto">
               {(userData?.occupation === 'college_student'
                 ? ['I feel homesick 🏠', 'Placement stress 😰', 'Feeling lonely', 'I have back pain']
-                : userData?.occupation === 'school_student'
-                ? ['Exam pressure 📝', 'Parents expect too much', 'Feeling stressed', 'Can\'t focus']
-                : userData?.occupation === 'working_professional'
-                ? ['Burnout at work 🔥', 'Work-life balance', 'Imposter syndrome', 'Feeling exhausted']
-                : ['I feel stressed', 'I have headaches', 'Help me sleep', 'Feeling low']
-              ).map(text => (
-                <button key={text} onClick={() => { setInput(text); setTimeout(() => { document.getElementById('chat-submit-btn')?.click(); }, 50); }}
-                  className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm whitespace-nowrap hover:bg-primary/20 transition-colors border border-primary/20">
-                  {text}
-                </button>
+                : ['Feeling stressed 😰', 'Help me relax 🧘', 'I need someone to talk to', 'Wellness tips 🌿']
+              ).map((chip, i) => (
+                <Button key={i} variant="outline" size="sm" className="whitespace-nowrap text-xs rounded-full border-primary/20 hover:bg-primary/10"
+                  onClick={() => { setInput(chip); }}>
+                  {chip}
+                </Button>
               ))}
             </div>
           )}
 
           <div className="p-3 border-t border-border bg-card">
-            <form onSubmit={e => { e.preventDefault(); sendMessage(); }} className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               {hasSpeechRecognition && (
-                <Button type="button" size="icon" variant={isListening ? 'default' : 'ghost'}
-                  onClick={isListening ? stopListening : startListening}
-                  className={`rounded-full h-10 w-10 shrink-0 ${isListening ? 'bg-destructive hover:bg-destructive/90 animate-pulse' : 'text-muted-foreground hover:text-foreground'}`}
-                  disabled={isLoading}>
-                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                <Button size="icon" variant={isListening ? 'destructive' : 'ghost'} className="h-9 w-9 flex-shrink-0"
+                  onClick={isListening ? stopListening : startListening}>
+                  {isListening ? <MicOff className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
                 </Button>
               )}
-              <Input ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
-                placeholder={isListening ? 'Listening...' : 'Talk to Ruhi...'}
-                className="flex-1 bg-muted border-0 rounded-full" disabled={isLoading} />
-              <Button id="chat-submit-btn" type="submit" size="icon" disabled={!input.trim() || isLoading}
-                className="bg-primary hover:bg-primary/90 rounded-full w-10 h-10 shrink-0">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
+                placeholder="Talk to Ruhi..."
+                className="flex-1 text-sm bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+              />
+              <Button size="icon" onClick={sendMessage} disabled={!input.trim() || isLoading} className="h-9 w-9 flex-shrink-0 rounded-full">
                 <Send className="w-4 h-4" />
               </Button>
-            </form>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              {isListening ? '🎙️ Speak now...' : 'Voice & text supported • '}
-              <button className="text-primary underline" onClick={() => window.open('tel:+911234567890', '_self')}>
-                Emergency help
-              </button>
-            </p>
+            </div>
+            <div className="mt-2 text-center text-[10px] text-muted-foreground flex items-center justify-center gap-1">
+              <span>Voice & text supported</span>
+              <span>•</span>
+              <a href="tel:14416" className="underline hover:text-primary">Emergency help</a>
+            </div>
           </div>
         </div>
       )}
     </>
   );
-};
+}
 
 export default FloatingChat;
