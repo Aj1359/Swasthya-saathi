@@ -23,7 +23,6 @@ const getSessionId = () => {
 
 function generateRuhiLocalResponse(messages: Message[]): string {
   const lastMsg = messages[messages.length - 1]?.content || '';
-  const historyText = messages.map(m => m.content.toLowerCase()).join(' ');
 
   const normalized = lastMsg.toLowerCase()
     .replace(/streesed|stresed|stresd|strssed|stres/g, 'stressed')
@@ -31,24 +30,28 @@ function generateRuhiLocalResponse(messages: Message[]): string {
     .replace(/wjat|wat|wht|wats/g, 'what')
     .replace(/intervew|intervow|intrview|intrvw/g, 'interview')
     .replace(/homesik|homesk/g, 'homesick')
-    .replace(/lonley|lonly/g, 'lonely');
+    .replace(/lonley|lonly/g, 'lonely')
+    .replace(/relastionship|relationsip|relatioship/g, 'relationship');
 
-  const isInterview = normalized.includes('interview') || historyText.includes('interview');
-  const isPlacement = normalized.includes('placement') || historyText.includes('placement');
-  const isExam = normalized.includes('exam') || historyText.includes('exam');
-  const isStress = normalized.includes('stressed') || normalized.includes('anxious') || normalized.includes('worried') || historyText.includes('stress');
-  const isHomesick = normalized.includes('homesick') || historyText.includes('homesick');
-  const isUncertain = normalized.includes('dont know') || normalized.includes("don't know") || normalized.includes('confused') || normalized.includes('lost') || normalized.includes('help');
+  const isInterview = normalized.includes('interview') || normalized.includes('placement');
+  const isStress = normalized.includes('stressed') || normalized.includes('anxious') || normalized.includes('worried') || normalized.includes('panic');
+  const isHomesick = normalized.includes('homesick') || normalized.includes('miss home');
+  const isRelationship = normalized.includes('relationship') || normalized.includes('breakup') || normalized.includes('partner') || normalized.includes('bf') || normalized.includes('gf') || normalized.includes('dating');
+  const isLoneliness = normalized.includes('lonely') || normalized.includes('alone') || normalized.includes('no friends');
+  const isPain = normalized.includes('back pain') || normalized.includes('headache') || normalized.includes('pain');
+  const isUncertain = normalized.includes('dont know') || normalized.includes("don't know") || normalized.includes('confused') || normalized.includes('lost');
 
   const assistantTurnCount = messages.filter(m => m.role === 'assistant').length;
 
-  if (isInterview || (isPlacement && isUncertain)) {
+  if (isRelationship) {
+    return "Relationship challenges can feel so heavy and overwhelming 💔. Take a moment to breathe. Remember, your peace and self-worth come first. Do you want to talk about what's going on, or would you prefer a quick calm-down exercise?";
+  }
+
+  if (isInterview) {
     if (assistantTurnCount <= 1) {
-      return "Interviews can feel super intimidating, especially when it's tomorrow! 😟 Deep breath. What's bothering you most — technical prep, HR questions, or just the nerves?";
-    } else if (assistantTurnCount === 2 || isUncertain) {
-      return "When you don't know where to start, focus on just 3 things tonight:\n\n1️⃣ Re-read your resume bullet points\n2️⃣ Practice a 1-minute intro ('tell me about yourself')\n3️⃣ Get 7 hours of sleep. You got this! 💪\n\nWant to do a quick 2-minute calm breath with me?";
+      return "Interviews can feel super intimidating, especially when they're coming up! 😟 Deep breath. What's bothering you most — technical prep, HR questions, or just the nerves?";
     } else {
-      return "Remember, an interview is just a conversation, not an interrogation. They already liked your resume! Sleep well tonight, wear comfortable clothes, and sip water before entering. How are you feeling now? 🌿";
+      return "Remember, an interview is just a 2-way conversation, not an interrogation. They already liked your profile! Sleep well tonight, wear comfortable clothes, and sip water before entering. How are you feeling now? 🌿";
     }
   }
 
@@ -56,8 +59,16 @@ function generateRuhiLocalResponse(messages: Message[]): string {
     return "Missing home is so valid 🏡. It just means you have a place full of love to miss. Call a family member or friend for 5 minutes, or eat a cozy comfort meal today. What usually makes you feel a bit warmer when you're away?";
   }
 
-  if (isExam || isStress) {
-    return "Take a slow, deep breath in... and let it out. 🌬️ When stress builds up, breaking things down into tiny 15-minute steps helps. What's one small thing we can tackle right now?";
+  if (isLoneliness) {
+    return "Feeling lonely is tough, but you are not alone right now — I'm right here with you 💚. Sometimes taking a small step like joining a study group or sitting in a cozy café helps. What's one gentle activity you enjoy?";
+  }
+
+  if (isPain) {
+    return "Physical discomfort like pain can really drain your energy 🌿. Please take a gentle stretch break, stay hydrated, and rest your posture. Have you been able to take a short break today?";
+  }
+
+  if (isStress || isUncertain) {
+    return "Take a slow, deep breath in... and let it out. 🌬️ When stress builds up, breaking things down into tiny steps helps. What's one small thing we can focus on right now?";
   }
 
   return "I hear you 💚. It takes courage to open up about how you're feeling. I'm right here with you — tell me a bit more about what's on your mind?";
@@ -85,7 +96,6 @@ export function FloatingChat({ initialMessage }: FloatingChatProps) {
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
   const sessionId = useRef(getSessionId());
 
-  // Preload speech synthesis voices
   useEffect(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
@@ -192,7 +202,6 @@ export function FloatingChat({ initialMessage }: FloatingChatProps) {
     if (!voiceEnabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     
-    // Clean markdown formatting and emojis for clean speech output
     const cleaned = text
       .replace(/[#*_~`>|]/g, '')
       .replace(/\[.*?\]\(.*?\)/g, '')
@@ -282,7 +291,7 @@ export function FloatingChat({ initialMessage }: FloatingChatProps) {
       }
     } catch (error) {
       console.error('Chat error:', error);
-      const errMsg = "I'm sorry, I couldn't respond right now. Please try again 💚";
+      const errMsg = "I'm sorry, I couldn't respond right now. Please try again <ctrl42>";
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
       saveMessage('assistant', errMsg);
     } finally {
