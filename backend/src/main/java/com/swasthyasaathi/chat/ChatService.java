@@ -4,6 +4,9 @@ import com.swasthyasaathi.gemini.GeminiClient;
 import com.swasthyasaathi.model.*;
 import com.swasthyasaathi.rag.RagService;
 import com.swasthyasaathi.repository.*;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,38 @@ public class ChatService {
     }
 
     private static final Pattern CRISIS_PATTERN = Pattern.compile(
-        "\\b(suicide|suicidal|kill myself|end my life|want to die|self-harm|harm myself|hopeless|cannot go on|don't want to live|end it all)\\b",
+        "\\b(" +
+        "suicid[a-z]*|suicde|suicidle|suiside|suicdal|" +
+        "(kill|kil|harm)\\s+(my\\s*self)|" +
+        "(end|ending)\\s+(my\\s*(life|lyfe)|it\\s*all)|" +
+        "(want|wnt|wana|wanna)\\s+(to\\s+)?(die|dye|kill\\s+my\\s*self|end\\s+my\\s+(life|lyfe)|end\\s+it\\s+all)|" +
+        "self-?harm(ing)?|" +
+        "goodbye\\s+(letter|letters|note|notes|to\\s+everyone)|" +
+        "disappear(ed)?\\s+forever|" +
+        "better\\s+off\\s+without\\s+me|" +
+        "sleep\\s+forever|" +
+        "cannot\\s+bear\\s+waking\\s+up|" +
+        "bought\\s+a\\s+rope|" +
+        "swallowed.*pills|" +
+        "balcony\\s+edge|" +
+        "no\\s+reason.*stay\\s+alive|" +
+        "no\\s+reason\\s+to\\s+live|" +
+        "final\\s+(goodbye|night)|" +
+        "giving\\s+away.*possessions|" +
+        "marne\\s+ka\\s+(man|mann)|mar\\s+jan(a|e)|mar\\s+jau|" +
+        "jeene\\s+ka\\s+(man|mann|koi\\s+matlab).*nahi|jeene\\s+ki\\s+himmat|nahi\\s+jee\\s+sakta|" +
+        "(apni\\s+)?jaan\\s+leni\\s+hai|" +
+        "apne\\s+aap\\s+ko\\s+harm|" +
+        "khatam\\s+kar\\s*(dunga|dena|na)|" +
+        "zindagi\\s+(end|se\\s+thak)|" +
+        "maut\\s+chahiye|" +
+        "bardasht\\s+nahi\\s+hota.*suicide|" +
+        "umeed\\s+nahi|" +
+        "zinda\\s+rehne\\s+ka\\s+koi\\s+matlab\\s+nahi|" +
+        "cant\\s+go\\s+on|cannot\\s+go\\s+on\\s+(anymore|living|with\\s+this\\s+suffering)|" +
+        "(don'?t|dont)\\s+(want\\s+to|wanna)\\s+live\\s+(anymore|in\\s+this\\s+world|another\\s+day)|" +
+        "(feel(ing)?\\s+)?(completely\\s+|comepletely\\s+|so\\s+)?hopeless?(ness)?(?!(\\s+(romantic|cook|at|learning)))" +
+        ")\\b",
         Pattern.CASE_INSENSITIVE
     );
 
@@ -58,6 +92,39 @@ public class ChatService {
     private final FaceScanRepository faceScanRepository;
     private final VoiceMoodScanRepository voiceMoodScanRepository;
     private final ProfileRepository profileRepository;
+    private final MeterRegistry meterRegistry;
+    private final Timer safetyTimer;
+    private final Timer ragTimer;
+    private final Timer geminiTimer;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ChatService(GeminiClient geminiClient,
+                       RagService ragService,
+                       ChatMessageRepository chatMessageRepository,
+                       FaceScanRepository faceScanRepository,
+                       VoiceMoodScanRepository voiceMoodScanRepository,
+                       ProfileRepository profileRepository,
+                       MeterRegistry meterRegistry) {
+        this.geminiClient = geminiClient;
+        this.ragService = ragService;
+        this.chatMessageRepository = chatMessageRepository;
+        this.faceScanRepository = faceScanRepository;
+        this.voiceMoodScanRepository = voiceMoodScanRepository;
+        this.profileRepository = profileRepository;
+        this.meterRegistry = meterRegistry != null ? meterRegistry : Metrics.globalRegistry;
+        this.safetyTimer = Timer.builder("swasthya.pipeline.safety")
+                .description("Safety and intent detection latency")
+                .publishPercentiles(0.5, 0.95)
+                .register(this.meterRegistry);
+        this.ragTimer = Timer.builder("swasthya.pipeline.rag")
+                .description("RAG retrieval latency")
+                .publishPercentiles(0.5, 0.95)
+                .register(this.meterRegistry);
+        this.geminiTimer = Timer.builder("swasthya.pipeline.gemini")
+                .description("Gemini client synthesis latency")
+                .publishPercentiles(0.5, 0.95)
+                .register(this.meterRegistry);
+    }
 
     public ChatService(GeminiClient geminiClient,
                        RagService ragService,
@@ -65,12 +132,7 @@ public class ChatService {
                        FaceScanRepository faceScanRepository,
                        VoiceMoodScanRepository voiceMoodScanRepository,
                        ProfileRepository profileRepository) {
-        this.geminiClient = geminiClient;
-        this.ragService = ragService;
-        this.chatMessageRepository = chatMessageRepository;
-        this.faceScanRepository = faceScanRepository;
-        this.voiceMoodScanRepository = voiceMoodScanRepository;
-        this.profileRepository = profileRepository;
+        this(geminiClient, ragService, chatMessageRepository, faceScanRepository, voiceMoodScanRepository, profileRepository, Metrics.globalRegistry);
     }
 
     /**
@@ -95,7 +157,13 @@ public class ChatService {
         String sessionHash = Integer.toHexString(safeSessionId.hashCode());
 
         // ─── 2. SAFETY & INTENT DETECTION ─────────────────────────────────────────
-        ChatIntent detectedIntent = detectIntent(sanitizedContent);
+        ChatIntent detectedIntent;
+        Timer.Sample safetySample = Timer.start(meterRegistry);
+        try {
+            detectedIntent = detectIntent(sanitizedContent);
+        } finally {
+            safetySample.stop(safetyTimer);
+        }
 
         // ─── 3. CRISIS ISOLATED RESPONSE PATH (NO STANDARD RAG CHAT) ───────────────
         if (detectedIntent == ChatIntent.CRISIS) {
@@ -115,7 +183,13 @@ public class ChatService {
         }
 
         // ─── 4. RAG RETRIEVAL & CONTEXT ASSEMBLY LAYER ─────────────────────────────
-        List<KnowledgeChunk> retrievedChunks = ragService.retrieveRelevantChunks(sanitizedContent, 0.3, 4);
+        List<KnowledgeChunk> retrievedChunks;
+        Timer.Sample ragSample = Timer.start(meterRegistry);
+        try {
+            retrievedChunks = ragService.retrieveRelevantChunks(sanitizedContent, 0.3, 4);
+        } finally {
+            ragSample.stop(ragTimer);
+        }
         String ragContext = (retrievedChunks == null || retrievedChunks.isEmpty())
                 ? "No background reference guides retrieved."
                 : retrievedChunks.stream()
@@ -199,7 +273,13 @@ public class ChatService {
         );
 
         // ─── 5. GEMINI SYNTHESIS LAYER & OUTPUT VALIDATION ─────────────────────────
-        String rawReply = geminiClient.generateContent(systemPrompt, userPrompt, false);
+        String rawReply;
+        Timer.Sample geminiSample = Timer.start(meterRegistry);
+        try {
+            rawReply = geminiClient.generateContent(systemPrompt, userPrompt, false);
+        } finally {
+            geminiSample.stop(geminiTimer);
+        }
         String safeReply = sanitizeOutput(rawReply);
 
         saveMessagePair(profile, safeSessionId, sanitizedContent, safeReply);
