@@ -1,0 +1,26 @@
+==========================================================================================
+EXPERIMENT J: FRONTEND PRODUCTION BUNDLE AUDIT
+Date: Thu Oct 15 05:44:50 IST 2026
+Tool: Vite v5.4.19 (npm run build)
+==========================================================================================
+OUTPUT ARTIFACTS & CHUNK SIZES:
+  • HTML:
+    - dist/index.html                                     1.09 kB │ gzip:   0.53 kB
+  • CSS:
+    - dist/assets/index-aX3fBpk4.css                     99.04 kB │ gzip:  15.82 kB
+  • JavaScript Bundle:
+    - dist/assets/index-BYKM1qaG.js                   1,352.15 kB │ gzip: 395.30 kB (1.35 MB raw)
+  • Static Media Assets:
+    - dist/assets/swasthya-saathi-logo-CHf08RIO.jpeg      8.59 kB
+    - dist/assets/river-DFqAenT0.mp3                  7,895.04 kB
+    - dist/assets/tibetian-BjvTgFjl.mp3               8,040.96 kB
+    - dist/assets/wind-ofXJEwti.mp3                  11,880.91 kB
+    - dist/assets/birds-C2-wPy2A.mp3                 12,727.20 kB
+    - dist/assets/ocean-DS1DXvOE.mp3                 14,388.96 kB
+    - dist/assets/forest-BuurEKdm.mp3                28,773.15 kB
+
+AUDIT FINDINGS & WARNINGS:
+1. Monolithic JS Bundle: 1,352.15 kB exceeds Vite's 500 kB recommendation threshold.
+2. Large uncompressed MP3 ambient audio files bundled directly into dist/ totaling ~83.7 MB.
+3. Build Time: 37.56s (2,765 modules transformed).
+==========================================================================================

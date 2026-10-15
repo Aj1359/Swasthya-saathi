@@ -1,0 +1,62 @@
+==========================================================================================
+EXPERIMENT I: TEST SUITE & JACOCO CODE COVERAGE AUDIT
+Date: Thu Oct 15 05:43:14 IST 2026
+Build Tool: Apache Maven 3.9.6, JaCoCo Plugin 0.8.12
+Java Runtime: OpenJDK 21.0.10 (Temurin)
+==========================================================================================
+TEST EXECUTION SUMMARY:
+  • Total Test Classes Executed: 8
+  • Total Unit & Integration Tests Run: 22
+  • Failures: 0
+  • Errors: 0
+  • Skipped: 0
+  • Test Result: 100% PASSED (BUILD SUCCESS)
+
+JACOCO CODE COVERAGE BREAKDOWN:
+
+1. Chat & Safety Package (com.swasthyasaathi.chat)
+  • ChatService:
+    - Instruction Coverage: 89.18% (577 covered / 647 total, 70 missed)
+    - Branch Coverage:      76.56% (49 covered / 64 total, 15 missed)
+    - Line Coverage:        92.86% (143 covered / 154 total, 11 missed)
+  • ChatController:
+    - Instruction Coverage: 98.41% (62 covered / 63 total, 1 missed)
+    - Line Coverage:        100.0% (17 covered / 17 total, 0 missed)
+  • ChatResponse & ChatIntent:
+    - Instruction Coverage: 100.0% (82 covered / 82 total)
+
+2. Rate Limiting Package (com.swasthyasaathi.ratelimit)
+  • RateLimitService:
+    - Instruction Coverage: 96.55% (84 covered / 87 total, 3 missed)
+    - Branch Coverage:      62.50% (5 covered / 8 total, 3 missed)
+    - Line Coverage:        95.24% (20 covered / 21 total, 1 missed)
+  • RateLimitService.TokenBucket:
+    - Instruction Coverage: 84.44% (38 covered / 45 total, 7 missed)
+    - Line Coverage:        85.71% (12 covered / 14 total, 2 missed)
+
+3. Authentication & Security Package (com.swasthyasaathi.auth & config)
+  • JwtFilter:
+    - Instruction Coverage: 100.0% (80 covered / 80 total, 0 missed)
+    - Branch Coverage:      70.00% (7 covered / 10 total, 3 missed)
+    - Line Coverage:        100.0% (23 covered / 23 total, 0 missed)
+  • JwtUtil:
+    - Instruction Coverage: 79.04% (132 covered / 167 total, 35 missed)
+    - Branch Coverage:      50.00% (7 covered / 14 total, 7 missed)
+    - Line Coverage:        81.82% (27 covered / 33 total, 6 missed)
+  • SecurityConfig:
+    - Instruction Coverage: 99.22% (128 covered / 129 total, 1 missed)
+    - Line Coverage:        100.0% (28 covered / 28 total, 0 missed)
+  • CustomUserDetailsService:
+    - Instruction Coverage: 76.92% (20 covered / 26 total)
+  • UserPrincipal:
+    - Instruction Coverage: 65.71% (23 covered / 35 total)
+  • AuthController:
+    - Instruction Coverage: 8.41% (18 covered / 214 total - only signup mock executed)
+
+4. RAG Package (com.swasthyasaathi.rag)
+  • RagService:
+    - Instruction Coverage: 55.30% (73 covered / 132 total, 59 missed)
+    - Line Coverage:        66.67% (20 covered / 30 total, 10 missed)
+
+Source file: backend/target/site/jacoco/jacoco.csv
+==========================================================================================

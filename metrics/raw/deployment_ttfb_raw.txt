@@ -1,0 +1,27 @@
+==========================================================================================
+EXPERIMENT K: PRODUCTION DEPLOYMENT LATENCY & TTFB AUDIT
+Date: 2026-10-15 05:37:39
+==========================================================================================
+
+Target: Frontend (Vercel) (https://swasthya-saathi.vercel.app)
+  • First-Request Latency (Cold/Idle TTFB): 525.62 ms
+  • Mean Latency: 579.88 ms
+  • Median (p50): 340.46 ms
+  • 95th Percentile (p95): 1604.36 ms
+  • Min: 93.43 ms | Max: 1604.36 ms
+  • Status Codes: [200, 200, 200, 200, 200]
+  • Sample Timings (ms): 525.6, 335.5, 340.5, 1604.4, 93.4
+
+Target: Backend API (Render) (https://swasthya-saathi-backend-sbme.onrender.com/actuator/health)
+  • First-Request Latency (Cold/Idle TTFB): 796.25 ms
+  • Mean Latency: 620.89 ms
+  • Median (p50): 639.49 ms
+  • 95th Percentile (p95): 796.25 ms
+  • Min: 510.32 ms | Max: 796.25 ms
+  • Status Codes: [200, 200, 200, 200, 200]
+  • Sample Timings (ms): 796.3, 642.5, 639.5, 515.9, 510.3
+
+FINDINGS:
+1. Vercel edge deployment serves frontend with steady TTFB ~579.9 ms.
+2. Render backend cold start / idle latency was 796.3 ms; warm mean ~620.9 ms.
+==========================================================================================

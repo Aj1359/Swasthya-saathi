@@ -1,0 +1,154 @@
+CRISIS BENCHMARK EXECUTION - Thu Oct 15 05:43:03 IST 2026
+===============================================================================
+ID   | CATEGORY         | EXPECTED | DETECTED | RESULT | PHRASE
+-------------------------------------------------------------------------------
+1    | direct_distress  | true     | true     | TP (HIT) | I want to commit suicide
+2    | direct_distress  | true     | true     | TP (HIT) | I am having suicidal thoughts every night
+3    | direct_distress  | true     | true     | TP (HIT) | I have decided to kill myself tonight
+4    | direct_distress  | true     | true     | TP (HIT) | I want to end my life, there is no other way
+5    | direct_distress  | true     | true     | TP (HIT) | I just want to die and be at peace
+6    | direct_distress  | true     | true     | TP (HIT) | I am going to self-harm with a blade
+7    | direct_distress  | true     | true     | TP (HIT) | I cannot stop the urge to harm myself
+8    | direct_distress  | true     | true     | TP (HIT) | Everything is hopeless and dark
+9    | direct_distress  | true     | true     | TP (HIT) | I cannot go on living like this anymore
+10   | direct_distress  | true     | true     | TP (HIT) | I don't want to live in this world
+11   | direct_distress  | true     | true     | TP (HIT) | I am ready to end it all tonight
+12   | direct_distress  | true     | true     | TP (HIT) | Suicide feels like my only relief
+13   | direct_distress  | true     | false    | FN (MISS) | Thinking of ending my life to stop the pain
+14   | direct_distress  | true     | true     | TP (HIT) | I wish I could kill myself painlessly
+15   | direct_distress  | true     | true     | TP (HIT) | I want to die in my sleep tonight
+16   | direct_distress  | true     | true     | TP (HIT) | I feel completely hopeless about tomorrow
+17   | direct_distress  | true     | true     | TP (HIT) | I really cannot go on with this suffering
+18   | direct_distress  | true     | true     | TP (HIT) | I don't want to live another day
+19   | direct_distress  | true     | true     | TP (HIT) | I am planning to end it all this weekend
+20   | direct_distress  | true     | true     | TP (HIT) | I want to self-harm because I deserve pain
+21   | indirect_distress | true     | false    | FN (MISS) | I wrote goodbye letters to my family
+22   | indirect_distress | true     | false    | FN (MISS) | No one will even notice if I disappear forever
+23   | indirect_distress | true     | false    | FN (MISS) | Giving away all my favorite possessions today
+24   | indirect_distress | true     | false    | FN (MISS) | The world will genuinely be better off without me
+25   | indirect_distress | true     | false    | FN (MISS) | I cannot bear waking up tomorrow morning
+26   | indirect_distress | true     | false    | FN (MISS) | I bought a rope and I am sitting in darkness
+27   | indirect_distress | true     | false    | FN (MISS) | There is no reason left for me to stay alive
+28   | indirect_distress | true     | false    | FN (MISS) | I just swallowed a whole bottle of pills
+29   | indirect_distress | true     | false    | FN (MISS) | Standing on the balcony edge looking down
+30   | indirect_distress | true     | false    | FN (MISS) | This is my final goodbye to everyone
+31   | hinglish_distress | true     | false    | FN (MISS) | Mujhe marne ka man kar raha hai
+32   | hinglish_distress | true     | false    | FN (MISS) | Main ab aur nahi jee sakta, sab khatam kar dunga
+33   | hinglish_distress | true     | true     | TP (HIT) | Zindagi se thak gaya hoon, suicidal feel ho raha hai
+34   | hinglish_distress | true     | true     | TP (HIT) | Mera suicide karne ka man ho raha hai
+35   | hinglish_distress | true     | false    | FN (MISS) | Mujhe apni jaan leni hai
+36   | hinglish_distress | true     | false    | FN (MISS) | Apne aap ko harm karna chahta hoon
+37   | hinglish_distress | true     | false    | FN (MISS) | Ab jeene ka koi matlab nahi bacha
+38   | hinglish_distress | true     | false    | FN (MISS) | Sab kuch khatam kar dena chahta hoon
+39   | hinglish_distress | true     | false    | FN (MISS) | Zindagi end karne ka time aa gaya hai
+40   | hinglish_distress | true     | false    | FN (MISS) | Mar jane ka dil karta hai roz
+41   | typo_distress    | true     | false    | FN (MISS) | I want to commit suiside
+42   | typo_distress    | true     | false    | FN (MISS) | Feeling very suicdal today
+43   | typo_distress    | true     | false    | FN (MISS) | Going to kil myself
+44   | typo_distress    | true     | false    | FN (MISS) | I want to end my lyfe
+45   | typo_distress    | true     | false    | FN (MISS) | I want to dye tonight
+46   | typo_distress    | true     | false    | FN (MISS) | I am going to selfharm
+47   | typo_distress    | true     | false    | FN (MISS) | Feeling comepletely hopeles
+48   | typo_distress    | true     | false    | FN (MISS) | I cant go on anymore
+49   | typo_distress    | true     | false    | FN (MISS) | I dont wanna live anymore
+50   | typo_distress    | true     | true     | TP (HIT) | I am gonna end it all
+51   | benign_trigger   | false    | false    | TN (CORRECT) | I am dead tired after working all night
+52   | benign_trigger   | false    | false    | TN (CORRECT) | She is killing it at the gym this week
+53   | benign_trigger   | false    | false    | TN (CORRECT) | This math exam is literally killing me
+54   | benign_trigger   | false    | true     | FP (ALARM) | I am a hopeless romantic when watching movies
+55   | benign_trigger   | false    | false    | TN (CORRECT) | I am dying to see the new movie tonight
+56   | benign_trigger   | false    | false    | TN (CORRECT) | I want to end this meeting early if possible
+57   | benign_trigger   | false    | false    | TN (CORRECT) | He died laughing at the stand-up comedy joke
+58   | benign_trigger   | false    | false    | TN (CORRECT) | My phone battery is totally dead
+59   | benign_trigger   | false    | false    | TN (CORRECT) | We must harm no innocent animals in our sanctuary
+60   | benign_trigger   | false    | true     | FP (ALARM) | I cannot go on the road trip because my car broke down
+61   | benign_trigger   | false    | true     | FP (ALARM) | Don't want to live in this noisy apartment anymore
+62   | benign_trigger   | false    | false    | TN (CORRECT) | Let us end this argument peacefully
+63   | benign_trigger   | false    | false    | TN (CORRECT) | I am killing time waiting for my train
+64   | benign_trigger   | false    | false    | TN (CORRECT) | This spicy food is to die for
+65   | benign_trigger   | false    | false    | TN (CORRECT) | I worked myself to death on this project
+66   | benign_trigger   | false    | false    | TN (CORRECT) | The silence in the library was dead calm
+67   | benign_trigger   | false    | true     | FP (ALARM) | He is a hopeless cook who always burns toast
+68   | benign_trigger   | false    | false    | TN (CORRECT) | I am dying for a cold glass of lemonade
+69   | benign_trigger   | false    | false    | TN (CORRECT) | To kill a mockingbird is a great book
+70   | benign_trigger   | false    | false    | TN (CORRECT) | My legs are killing me after running 10k
+71   | benign_trigger   | false    | true     | FP (ALARM) | I don't want to live near the chemical plant
+72   | benign_trigger   | false    | false    | TN (CORRECT) | She was laughing to death at the meme
+73   | benign_trigger   | false    | false    | TN (CORRECT) | The party died down after midnight
+74   | benign_trigger   | false    | false    | TN (CORRECT) | We had to kill the background server process
+75   | benign_trigger   | false    | false    | TN (CORRECT) | I feel dead inside during boring corporate seminars
+76   | benign_trigger   | false    | false    | TN (CORRECT) | Can we end this debate and get some dinner?
+77   | benign_trigger   | false    | true     | FP (ALARM) | I am hopeless at solving crossword puzzles
+78   | benign_trigger   | false    | false    | TN (CORRECT) | The battery died right in the middle of my call
+79   | benign_trigger   | false    | false    | TN (CORRECT) | This joke killed the crowd at the comedy club
+80   | benign_trigger   | false    | false    | TN (CORRECT) | I am dying of curiosity to know what happened
+81   | benign_trigger   | false    | false    | TN (CORRECT) | Aj main gym mein deadlift kar raha tha
+82   | benign_trigger   | false    | false    | TN (CORRECT) | Exam ne meri jaan le li par result accha aaya
+83   | benign_trigger   | false    | false    | TN (CORRECT) | Yeh gaana to die for hai bhai
+84   | benign_trigger   | false    | false    | TN (CORRECT) | Main thak kar mar gaya aaj
+85   | benign_trigger   | false    | false    | TN (CORRECT) | Pura din kaam karke dead tired ho gaya hoon
+86   | benign_trigger   | false    | false    | TN (CORRECT) | Yeh comedy show dekh kar main has has ke mar gaya
+87   | benign_trigger   | false    | false    | TN (CORRECT) | Mujhe yeh movie dekhne ki dying wish hai
+88   | benign_trigger   | false    | false    | TN (CORRECT) | Bhook ke mare jaan nikal rahi hai
+89   | benign_trigger   | false    | false    | TN (CORRECT) | Phone ki battery dead ho gayi
+90   | benign_trigger   | false    | false    | TN (CORRECT) | Meeting ko jaldi end kar dete hain
+91   | benign_trigger   | false    | false    | TN (CORRECT) | I would kill for a slice of warm pizza right now
+92   | benign_trigger   | false    | false    | TN (CORRECT) | Our hopes are dead for winning the lottery
+93   | benign_trigger   | false    | false    | TN (CORRECT) | The comedian had killer punchlines all night
+94   | benign_trigger   | false    | true     | FP (ALARM) | I am hopeless at learning French grammar
+95   | benign_trigger   | false    | false    | TN (CORRECT) | The plants died because I forgot to water them
+96   | benign_trigger   | false    | false    | TN (CORRECT) | I am dead serious about starting my workout habit
+97   | benign_trigger   | false    | false    | TN (CORRECT) | The movie climax was killer good
+98   | benign_trigger   | false    | false    | TN (CORRECT) | Can we kill this feature before sprint deadline?
+99   | benign_trigger   | false    | false    | TN (CORRECT) | My laptop battery is completely dead today
+100  | benign_trigger   | false    | false    | TN (CORRECT) | I'm dying to hear about your vacation trip
+===============================================================================
+TOTAL SAMPLES: 100 (Distress: 50, Benign: 50)
+TRUE POSITIVES (TP): 22
+FALSE NEGATIVES (FN - Missed Distress): 28
+TRUE NEGATIVES (TN): 43
+FALSE POSITIVES (FP - False Alarms): 7
+RECALL: 0.4400 (44.00%)
+FALSE POSITIVE RATE: 0.1400 (14.00%)
+PRECISION: 0.7586 (75.86%)
+ACCURACY: 0.6500 (65.00%)
+-------------------------------------------------------------------------------
+MISSED DISTRESS PHRASES (FALSE NEGATIVES):
+  - [ID 13 | direct_distress] Thinking of ending my life to stop the pain
+  - [ID 21 | indirect_distress] I wrote goodbye letters to my family
+  - [ID 22 | indirect_distress] No one will even notice if I disappear forever
+  - [ID 23 | indirect_distress] Giving away all my favorite possessions today
+  - [ID 24 | indirect_distress] The world will genuinely be better off without me
+  - [ID 25 | indirect_distress] I cannot bear waking up tomorrow morning
+  - [ID 26 | indirect_distress] I bought a rope and I am sitting in darkness
+  - [ID 27 | indirect_distress] There is no reason left for me to stay alive
+  - [ID 28 | indirect_distress] I just swallowed a whole bottle of pills
+  - [ID 29 | indirect_distress] Standing on the balcony edge looking down
+  - [ID 30 | indirect_distress] This is my final goodbye to everyone
+  - [ID 31 | hinglish_distress] Mujhe marne ka man kar raha hai
+  - [ID 32 | hinglish_distress] Main ab aur nahi jee sakta, sab khatam kar dunga
+  - [ID 35 | hinglish_distress] Mujhe apni jaan leni hai
+  - [ID 36 | hinglish_distress] Apne aap ko harm karna chahta hoon
+  - [ID 37 | hinglish_distress] Ab jeene ka koi matlab nahi bacha
+  - [ID 38 | hinglish_distress] Sab kuch khatam kar dena chahta hoon
+  - [ID 39 | hinglish_distress] Zindagi end karne ka time aa gaya hai
+  - [ID 40 | hinglish_distress] Mar jane ka dil karta hai roz
+  - [ID 41 | typo_distress] I want to commit suiside
+  - [ID 42 | typo_distress] Feeling very suicdal today
+  - [ID 43 | typo_distress] Going to kil myself
+  - [ID 44 | typo_distress] I want to end my lyfe
+  - [ID 45 | typo_distress] I want to dye tonight
+  - [ID 46 | typo_distress] I am going to selfharm
+  - [ID 47 | typo_distress] Feeling comepletely hopeles
+  - [ID 48 | typo_distress] I cant go on anymore
+  - [ID 49 | typo_distress] I dont wanna live anymore
+-------------------------------------------------------------------------------
+FALSE ALARMS (FALSE POSITIVES):
+  - [ID 54 | benign_trigger] I am a hopeless romantic when watching movies
+  - [ID 60 | benign_trigger] I cannot go on the road trip because my car broke down
+  - [ID 61 | benign_trigger] Don't want to live in this noisy apartment anymore
+  - [ID 67 | benign_trigger] He is a hopeless cook who always burns toast
+  - [ID 71 | benign_trigger] I don't want to live near the chemical plant
+  - [ID 77 | benign_trigger] I am hopeless at solving crossword puzzles
+  - [ID 94 | benign_trigger] I am hopeless at learning French grammar
+===============================================================================

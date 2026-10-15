@@ -1,0 +1,26 @@
+==========================================================================================
+EXPERIMENT A: PIPELINE STAGE TIMING BENCHMARK (MICROMETER & ACTUATOR METRICS)
+Date: Thu Oct 15 05:43:10 IST 2026
+Environment: Localhost (Windows 11, OpenJDK 21 Temurin, Spring Boot Actuator 3.3.2)
+Total Processed Requests: 100
+Successful (HTTP 200): 100
+Crisis Interceptions (Gemini Bypassed): 20
+Standard Synthesis Requests (RAG + Gemini): 80
+==========================================================================================
+Pipeline Stage            | Count      | Mean Latency    | Max Latency     | Unit           
+------------------------------------------------------------------------------------------
+1. Rate Limiting          | 100        | 0.0032          | 0.0138          | ms
+2. Safety & Crisis Check  | 100        | 0.0214          | 0.0475          | ms
+3. RAG Retrieval          | 80         | 4.8520          | 5.6511          | ms
+4. Gemini Call (Mocked)   | 80         | 12.8076         | 13.7028         | ms
+==========================================================================================
+ACTUATOR /actuator/metrics RAW ENDPOINT PAYLOADS:
+--- /actuator/metrics/swasthya.pipeline.ratelimit ---
+{"name":"swasthya.pipeline.ratelimit","description":"Rate limit check execution time","baseUnit":"seconds","measurements":[{"statistic":"COUNT","value":100.0},{"statistic":"TOTAL_TIME","value":3.171E-4},{"statistic":"MAX","value":1.38E-5}],"availableTags":[]}
+--- /actuator/metrics/swasthya.pipeline.safety ---
+{"name":"swasthya.pipeline.safety","description":"Safety and intent detection latency","baseUnit":"seconds","measurements":[{"statistic":"COUNT","value":100.0},{"statistic":"TOTAL_TIME","value":0.0021428},{"statistic":"MAX","value":4.75E-5}],"availableTags":[]}
+--- /actuator/metrics/swasthya.pipeline.rag ---
+{"name":"swasthya.pipeline.rag","description":"RAG retrieval latency","baseUnit":"seconds","measurements":[{"statistic":"COUNT","value":80.0},{"statistic":"TOTAL_TIME","value":0.3881563},{"statistic":"MAX","value":0.0056511}],"availableTags":[]}
+--- /actuator/metrics/swasthya.pipeline.gemini ---
+{"name":"swasthya.pipeline.gemini","description":"Gemini client synthesis latency","baseUnit":"seconds","measurements":[{"statistic":"COUNT","value":80.0},{"statistic":"TOTAL_TIME","value":1.0246064},{"statistic":"MAX","value":0.0137028}],"availableTags":[]}
+==========================================================================================

@@ -1,0 +1,19 @@
+GEMINI FAILURE SIMULATION BENCHMARK - Thu Oct 15 05:43:03 IST 2026
+==========================================================================================
+Scenario 1: Upstream Network / Read Timeout (SocketTimeoutException -> ResourceAccessException)
+  HTTP Response Status: 500
+  Raw Response Payload: {"timestamp":"2026-10-15T00:13:03.359781100Z","status":500,"error":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred. Please try again later.","path":"/api/chat"}
+  Client-Side Handling: Frontend catches error and displays fallback:
+    "I'm sorry, I couldn't respond right now. Please try again <ctrl42>"
+------------------------------------------------------------------------------------------
+Scenario 2: Upstream Gemini 503 Service Unavailable
+  HTTP Response Status: 500
+  Raw Response Payload: {"timestamp":"2026-10-15T00:13:03.392159700Z","status":500,"error":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred. Please try again later.","path":"/api/chat"}
+  Client-Side Handling: Frontend catches error and displays fallback:
+    "I'm sorry, I couldn't respond right now. Please try again <ctrl42>"
+==========================================================================================
+FINDINGS & AUDIT ASSESSMENT:
+1. Both Timeout and 503 errors result in HTTP 500 INTERNAL_SERVER_ERROR from Spring Boot backend.
+2. Backend emits: {"status":500, "error":"INTERNAL_SERVER_ERROR", "message":"An unexpected error occurred. Please try again later."}
+3. The user in UI is shielded from internal stack traces and sees the friendly prompt error.
+==========================================================================================

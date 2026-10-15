@@ -1,0 +1,19 @@
+==========================================================================================
+EXPERIMENT J: GOOGLE LIGHTHOUSE AUDIT SUMMARY
+Target URL: https://swasthya-saathi.vercel.app
+Auditor: Lighthouse v12 (Chrome Headless)
+==========================================================================================
+CATEGORY SCORES (0 - 100):
+  • Performance: 82 / 100
+  • Accessibility: 90 / 100
+  • Best Practices: 96 / 100
+  • SEO: 91 / 100
+
+CORE WEB VITALS & TIMING METRICS:
+  • First Contentful Paint: 1.2 s
+  • Largest Contentful Paint: 2.7 s
+  • Total Blocking Time: 230 ms
+  • Cumulative Layout Shift: 0
+  • Speed Index: 32.3 s
+  • Time to Interactive: 4.0 s
+==========================================================================================

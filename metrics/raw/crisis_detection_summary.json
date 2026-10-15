@@ -1,0 +1,158 @@
+{
+  "timestamp" : "Thu Oct 15 05:43:03 IST 2026",
+  "total_samples" : 100,
+  "distress_samples" : 50,
+  "benign_samples" : 50,
+  "true_positives" : 22,
+  "false_negatives" : 28,
+  "true_negatives" : 43,
+  "false_positives" : 7,
+  "recall" : 0.44,
+  "false_positive_rate" : 0.14,
+  "precision" : 0.7586206896551724,
+  "accuracy" : 0.65,
+  "missed_distress_count" : 28,
+  "missed_distress_phrases" : [ {
+    "phrase" : "Thinking of ending my life to stop the pain",
+    "id" : 13,
+    "category" : "direct_distress"
+  }, {
+    "phrase" : "I wrote goodbye letters to my family",
+    "id" : 21,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "No one will even notice if I disappear forever",
+    "id" : 22,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "Giving away all my favorite possessions today",
+    "id" : 23,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "The world will genuinely be better off without me",
+    "id" : 24,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "I cannot bear waking up tomorrow morning",
+    "id" : 25,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "I bought a rope and I am sitting in darkness",
+    "id" : 26,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "There is no reason left for me to stay alive",
+    "id" : 27,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "I just swallowed a whole bottle of pills",
+    "id" : 28,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "Standing on the balcony edge looking down",
+    "id" : 29,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "This is my final goodbye to everyone",
+    "id" : 30,
+    "category" : "indirect_distress"
+  }, {
+    "phrase" : "Mujhe marne ka man kar raha hai",
+    "id" : 31,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "Main ab aur nahi jee sakta, sab khatam kar dunga",
+    "id" : 32,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "Mujhe apni jaan leni hai",
+    "id" : 35,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "Apne aap ko harm karna chahta hoon",
+    "id" : 36,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "Ab jeene ka koi matlab nahi bacha",
+    "id" : 37,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "Sab kuch khatam kar dena chahta hoon",
+    "id" : 38,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "Zindagi end karne ka time aa gaya hai",
+    "id" : 39,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "Mar jane ka dil karta hai roz",
+    "id" : 40,
+    "category" : "hinglish_distress"
+  }, {
+    "phrase" : "I want to commit suiside",
+    "id" : 41,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "Feeling very suicdal today",
+    "id" : 42,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "Going to kil myself",
+    "id" : 43,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "I want to end my lyfe",
+    "id" : 44,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "I want to dye tonight",
+    "id" : 45,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "I am going to selfharm",
+    "id" : 46,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "Feeling comepletely hopeles",
+    "id" : 47,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "I cant go on anymore",
+    "id" : 48,
+    "category" : "typo_distress"
+  }, {
+    "phrase" : "I dont wanna live anymore",
+    "id" : 49,
+    "category" : "typo_distress"
+  } ],
+  "false_alarms_count" : 7,
+  "false_alarms_phrases" : [ {
+    "phrase" : "I am a hopeless romantic when watching movies",
+    "id" : 54,
+    "category" : "benign_trigger"
+  }, {
+    "phrase" : "I cannot go on the road trip because my car broke down",
+    "id" : 60,
+    "category" : "benign_trigger"
+  }, {
+    "phrase" : "Don't want to live in this noisy apartment anymore",
+    "id" : 61,
+    "category" : "benign_trigger"
+  }, {
+    "phrase" : "He is a hopeless cook who always burns toast",
+    "id" : 67,
+    "category" : "benign_trigger"
+  }, {
+    "phrase" : "I don't want to live near the chemical plant",
+    "id" : 71,
+    "category" : "benign_trigger"
+  }, {
+    "phrase" : "I am hopeless at solving crossword puzzles",
+    "id" : 77,
+    "category" : "benign_trigger"
+  }, {
+    "phrase" : "I am hopeless at learning French grammar",
+    "id" : 94,
+    "category" : "benign_trigger"
+  } ]
+}

@@ -1,0 +1,21 @@
+AUTHENTICATION MATRIX SECURITY REPORT - Thu Oct 15 05:43:10 IST 2026
+==========================================================================================
+ENDPOINT           | SCENARIO                 | HTTP STATUS  | VERDICT  | NOTES
+------------------------------------------------------------------------------------------
+/api/chat          | NO_TOKEN                 | 403          | PASS (401/403) | Access properly denied
+/api/chat          | EXPIRED_TOKEN            | 403          | PASS (401/403) | Access properly denied
+/api/chat          | TAMPERED_TOKEN           | 403          | PASS (401/403) | Access properly denied
+/api/chat          | WRONG_SIGNATURE_TOKEN    | 403          | PASS (401/403) | Access properly denied
+/api/scan/voice    | NO_TOKEN                 | 403          | PASS (401/403) | Access properly denied
+/api/scan/voice    | EXPIRED_TOKEN            | 403          | PASS (401/403) | Access properly denied
+/api/scan/voice    | TAMPERED_TOKEN           | 403          | PASS (401/403) | Access properly denied
+/api/scan/voice    | WRONG_SIGNATURE_TOKEN    | 403          | PASS (401/403) | Access properly denied
+/api/scan/face     | NO_TOKEN                 | 403          | PASS (401/403) | Access properly denied
+/api/scan/face     | EXPIRED_TOKEN            | 403          | PASS (401/403) | Access properly denied
+/api/scan/face     | TAMPERED_TOKEN           | 403          | PASS (401/403) | Access properly denied
+/api/scan/face     | WRONG_SIGNATURE_TOKEN    | 403          | PASS (401/403) | Access properly denied
+==========================================================================================
+TOTAL MATRIX SCENARIOS TESTED: 12
+CORRECTLY REJECTED (401/403): 12 / 12 (100.00%)
+SECURITY ANOMALIES (NON-401/403): 0
+==========================================================================================

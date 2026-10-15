@@ -1,0 +1,65 @@
+KNOWLEDGE CHUNK RETRIEVAL BENCHMARK REPORT (40 LABELED QUESTIONS)
+================================================================================
+Total Corpus Documents: 13
+Total Evaluation Queries: 40
+--------------------------------------------------------------------------------
+ID   | TOP-1  | TOP-3  | SCORE  | TARGET TITLE                        | QUESTION
+--------------------------------------------------------------------------------
+1    | True   | True   | 0.358  | Tele-MANAS National Mental Health   | What is the phone number for Tele-MANAS helpline in India?
+2    | True   | True   | 0.313  | Tele-MANAS National Mental Health   | Is Tele-MANAS available 24/7 and free of charge?
+3    | False  | True   | 0.234  | Tele-MANAS National Mental Health   | Can I get video consultation with a psychiatrist through government services in India?
+4    | True   | True   | 0.536  | Tele-MANAS National Mental Health   | How many languages does the national mental health helpline support in India?
+5    | True   | True   | 0.337  | Stress vs Anxiety: Understanding t  | What is the difference between stress and anxiety?
+6    | True   | True   | 0.228  | Stress vs Anxiety: Understanding t  | Why does my anxiety continue even after my exam has passed?
+7    | True   | True   | 0.373  | Stress vs Anxiety: Understanding t  | I have physical chest tightness and racing heart, is that stress or anxiety?
+8    | True   | True   | 0.167  | Stress vs Anxiety: Understanding t  | How long should anxiety symptoms persist before I need to seek professional help?
+9    | True   | True   | 0.299  | Understanding Burnout and Its Sign  | What are the common warning signs of burnout?
+10   | True   | True   | 0.302  | Understanding Burnout and Its Sign  | I feel completely detached, emotionally drained, and cynical about my studies.
+11   | True   | True   | 0.363  | Understanding Burnout and Its Sign  | Can I recover from burnout just through willpower and pushing harder?
+12   | True   | True   | 0.214  | Understanding Burnout and Its Sign  | Why do college students experience severe drops in accomplishment during exam seasons?
+13   | False  | False  | 0.233  | Masked Distress and Somatic Sympto  | Why do I get frequent headaches and fatigue when I feel emotionally stressed?
+14   | True   | True   | 0.451  | Masked Distress and Somatic Sympto  | Can emotional distress show up as a flat or monotone speaking voice?
+15   | True   | True   | 0.446  | Masked Distress and Somatic Sympto  | What is somatic distress and why do some people express strain through the body?
+16   | True   | True   | 0.283  | Masked Distress and Somatic Sympto  | How does social withdrawal relate to masked emotional strain?
+17   | True   | True   | 0.367  | The 5-4-3-2-1 Grounding Technique   | How do I perform the 5-4-3-2-1 grounding technique?
+18   | False  | False  | 0.143  | The 5-4-3-2-1 Grounding Technique   | What should I do during an acute anxiety spike or panic attack?
+19   | True   | True   | 0.230  | The 5-4-3-2-1 Grounding Technique   | What senses are engaged in the 54321 grounding exercise?
+20   | True   | True   | 0.311  | The 5-4-3-2-1 Grounding Technique   | How long does the 5-4-3-2-1 sensory grounding exercise take to work?
+21   | True   | True   | 0.474  | Behavioral Activation: Action Befo  | How does behavioral activation help when I have zero motivation to get out of bed?
+22   | True   | True   | 0.567  | Behavioral Activation: Action Befo  | Does motivation come before or after taking action according to CBT?
+23   | False  | False  | 0.213  | Behavioral Activation: Action Befo  | What is a small micro-action I can take when feeling deeply depressed?
+24   | True   | True   | 0.272  | Behavioral Activation: Action Befo  | Why is making your bed or drinking water effective for low energy states?
+25   | True   | True   | 0.311  | Box Breathing for Stress Reduction  | How do you practice 4-4-4-4 box breathing?
+26   | True   | True   | 0.308  | Box Breathing for Stress Reduction  | Can I do box breathing discreetly in a classroom or during an interview?
+27   | True   | True   | 0.485  | Box Breathing for Stress Reduction  | How many breathing cycles of box breathing are recommended for acute stress?
+28   | True   | True   | 0.278  | Box Breathing for Stress Reduction  | What breathing technique quickly slows down my autonomic physiological stress response?
+29   | True   | True   | 0.328  | Active Posture Reset for Screen Ti  | How do I fix forward head posture and rounded shoulders from studying on a laptop?
+30   | False  | False  | 0.233  | Active Posture Reset for Screen Ti  | What is a chin tuck exercise and how do you do it properly?
+31   | True   | True   | 0.273  | Active Posture Reset for Screen Ti  | How often should I reset my posture during prolonged computer use?
+32   | True   | True   | 0.182  | Active Posture Reset for Screen Ti  | How do deep ribcage breaths help release neck and shoulder tension?
+33   | True   | True   | 0.347  | Cognitive Reframing for Catastroph  | How can I stop catastrophizing after getting a bad grade on my exam?
+34   | True   | True   | 0.262  | Cognitive Reframing for Catastroph  | What does CBT recommend when one setback makes me feel like my whole life is ruined?
+35   | True   | True   | 0.375  | Cognitive Reframing for Catastroph  | What is the 'what would I tell a friend' reframing question?
+36   | True   | True   | 0.461  | Ruhi Persona and Tone Guide         | What is the tone and persona of Ruhi?
+37   | True   | True   | 0.326  | Ruhi Persona and Tone Guide         | Why does Ruhi avoid using clinical diagnostic labels like 'you have depression'?
+38   | True   | True   | 0.491  | Ruhi Opening Template for Low Mood  | How does Ruhi open a conversation when a facial scan detects low mood?
+39   | False  | True   | 0.272  | Ruhi Crisis Response Template       | What emergency helpline numbers does Ruhi provide during a crisis?
+40   | True   | True   | 0.485  | Research Context: Student Stress i  | What did the National Mental Health Survey find regarding student counseling stigma in India?
+================================================================================
+TOP-1 HIT RATE: 34/40 (85.00%)
+TOP-3 HIT RATE: 36/40 (90.00%)
+--------------------------------------------------------------------------------
+RETRIEVAL FAILURES (NOT IN TOP 3): 4
+  - [ID 13] "Why do I get frequent headaches and fatigue when I feel emotionally stressed?"
+      Expected Target: Masked Distress and Somatic Symptoms
+      Top-3 Retrieved: ['Ruhi Opening Template for Low Mood', 'Ruhi Crisis Response Template', 'Cognitive Reframing for Catastrophizing']
+  - [ID 18] "What should I do during an acute anxiety spike or panic attack?"
+      Expected Target: The 5-4-3-2-1 Grounding Technique
+      Top-3 Retrieved: ['Stress vs Anxiety: Understanding the Difference', 'Ruhi Opening Template for Low Mood', 'Ruhi Crisis Response Template']
+  - [ID 23] "What is a small micro-action I can take when feeling deeply depressed?"
+      Expected Target: Behavioral Activation: Action Before Motivation
+      Top-3 Retrieved: ['Cognitive Reframing for Catastrophizing', 'Ruhi Crisis Response Template', 'Ruhi Opening Template for Low Mood']
+  - [ID 30] "What is a chin tuck exercise and how do you do it properly?"
+      Expected Target: Active Posture Reset for Screen Time
+      Top-3 Retrieved: ['Ruhi Crisis Response Template', 'Ruhi Opening Template for Low Mood', 'Ruhi Persona and Tone Guide']
+================================================================================

@@ -1,0 +1,8 @@
+LIVE DATABASE RAG RETRIEVAL BENCHMARK
+================================================================================
+Connection Status: SUCCESSFUL
+Table public.knowledge_chunks count: 0
+Result: 0 chunks available in live database.
+Top-1 Hit Rate: 0.00% (0/40)
+Top-3 Hit Rate: 0.00% (0/40)
+Status: NOT RETRIEVABLE - Table is unseeded in live database.

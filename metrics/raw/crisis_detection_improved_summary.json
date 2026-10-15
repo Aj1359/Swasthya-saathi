@@ -1,0 +1,18 @@
+{
+  "timestamp" : "Thu Oct 15 05:50:20 IST 2026",
+  "total_samples" : 100,
+  "distress_samples" : 50,
+  "benign_samples" : 50,
+  "true_positives" : 50,
+  "false_negatives" : 0,
+  "true_negatives" : 50,
+  "false_positives" : 0,
+  "recall" : 1.0,
+  "false_positive_rate" : 0.0,
+  "precision" : 1.0,
+  "accuracy" : 1.0,
+  "missed_distress_count" : 0,
+  "missed_distress_phrases" : [ ],
+  "false_alarms_count" : 0,
+  "false_alarms_phrases" : [ ]
+}

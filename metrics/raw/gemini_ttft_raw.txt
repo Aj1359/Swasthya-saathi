@@ -1,0 +1,41 @@
+==========================================================================================
+UPSTREAM REAL GEMINI API TIME-TO-FIRST-TOKEN (TTFT) BENCHMARK
+Model: gemini-flash-latest
+Timestamp: 2026-10-15 05:35:49
+Protocol: Server-Sent Events (SSE) via streamGenerateContent?alt=sse
+Total Live Calls Made: 20 (Strict Limit: 20 calls enforced)
+==========================================================================================
+Call  | TTFB (ms)    | TTFT (ms)    | Total (ms)   | Bytes    | Prompt
+------------------------------------------------------------------------------------------
+1     | 4766.1       | 4766.1       | 8653.0       | 14917    | How can I practice box breathing to calm anxiety?
+2     | 4460.8       | 4460.8       | 7445.9       | 13466    | What are simple habits for better sleep hygiene?
+3     | 5193.4       | 5193.4       | 8161.9       | 11739    | I feel overwhelmed with work, can you give me 3 grounding steps?
+4     | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 503: Service Unavailable
+5     | 5862.9       | 5862.9       | 11870.7      | 16585    | How can I manage exam tension in a healthy way?
+6     | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 503: Service Unavailable
+7     | 4285.8       | 4285.8       | 8206.6       | 12785    | What is the 5-4-3-2-1 grounding method?
+8     | 7749.0       | 7749.0       | 8383.3       | 14098    | How does morning sunlight affect circadian rhythm?
+9     | 4419.6       | 4419.6       | 9026.8       | 15992    | Simple desk stretches to release shoulder tension.
+10    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+11    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+12    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+13    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+14    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+15    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+16    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+17    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+18    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+19    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+20    | ERROR        | ERROR        | ERROR        | 0        | HTTP Error 429: Too Many Requests
+==========================================================================================
+STATISTICAL SUMMARY ACROSS 20 LIVE UPSTREAM GEMINI CALLS:
+  • Successful Calls: 7 / 20 (100.0%)
+  • Time-to-First-Token (TTFT) Mean: 5248.25 ms
+  • Time-to-First-Token (TTFT) p50 : 4766.09 ms
+  • Time-to-First-Token (TTFT) p95 : 7748.98 ms
+  • Time-to-First-Token (TTFT) Min : 4285.77 ms
+  • Time-to-First-Token (TTFT) Max : 7748.98 ms
+  • Total Stream Completion Mean  : 8821.18 ms
+  • Total Stream Completion p50   : 8383.26 ms
+  • Total Stream Completion p95   : 11870.72 ms
+==========================================================================================

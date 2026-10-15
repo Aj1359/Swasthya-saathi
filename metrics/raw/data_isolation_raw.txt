@@ -1,0 +1,32 @@
+DATA ISOLATION BENCHMARK AUDIT - Thu Oct 15 05:43:11 IST 2026
+==========================================================================================
+Scenario: User B attempts to access conversation history from User A's sessionId
+User A ID: 1b4037b6-4b89-48ee-b9f0-8c7a0072adf9 (usera@privacy.test)
+User B ID: 2143ec0d-22ec-4afd-8307-e279d761f7a7 (userb@privacy.test)
+Target Session ID: session-leak-vector-42
+User A Injected Content: "CONFIDENTIAL_ALICE_SECRET_SYMPTOMS: Panic attacks during midterms"
+------------------------------------------------------------------------------------------
+Captured Prompt History injected for User B:
+USER PROFILE:
+- Name: Bob
+- Age: Unknown
+- Location: India
+
+PHYSIOLOGICAL OBSERVATIONS (LATEST SCANS):
+- Face/Posture: None
+- Voice: None
+
+RECENT SESSION HISTORY:
+user: CONFIDENTIAL_ALICE_SECRET_SYMPTOMS: Panic attacks during midterms
+assistant: Empathetic response from Ruhi
+
+USER MESSAGE:
+"What did we discuss earlier?"
+
+Generate Ruhi's empathetic response.
+------------------------------------------------------------------------------------------
+FINDING:
+LEAK CONFIRMED: User A's private messages WERE leaked into User B's LLM prompt context!
+Root Cause: ChatService.java line 153 queries findTop20BySessionIdOrderByCreatedAtDesc(safeSessionId)
+without validating that the session belongs exclusively to User B's profile ID.
+==========================================================================================

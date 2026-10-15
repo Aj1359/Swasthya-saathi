@@ -1,0 +1,59 @@
+{
+  "total_questions": 40,
+  "corpus_size": 13,
+  "top1_hits": 34,
+  "top1_rate": 0.85,
+  "top3_hits": 36,
+  "top3_rate": 0.9,
+  "failure_count": 4,
+  "failures": [
+    {
+      "id": 13,
+      "question": "Why do I get frequent headaches and fatigue when I feel emotionally stressed?",
+      "target": "Masked Distress and Somatic Symptoms",
+      "top1_retrieved": "Ruhi Opening Template for Low Mood",
+      "top1_score": 0.23334044969489479,
+      "top3_retrieved": [
+        "Ruhi Opening Template for Low Mood",
+        "Ruhi Crisis Response Template",
+        "Cognitive Reframing for Catastrophizing"
+      ]
+    },
+    {
+      "id": 18,
+      "question": "What should I do during an acute anxiety spike or panic attack?",
+      "target": "The 5-4-3-2-1 Grounding Technique",
+      "top1_retrieved": "Stress vs Anxiety: Understanding the Difference",
+      "top1_score": 0.14311846976304207,
+      "top3_retrieved": [
+        "Stress vs Anxiety: Understanding the Difference",
+        "Ruhi Opening Template for Low Mood",
+        "Ruhi Crisis Response Template"
+      ]
+    },
+    {
+      "id": 23,
+      "question": "What is a small micro-action I can take when feeling deeply depressed?",
+      "target": "Behavioral Activation: Action Before Motivation",
+      "top1_retrieved": "Cognitive Reframing for Catastrophizing",
+      "top1_score": 0.2129424369541325,
+      "top3_retrieved": [
+        "Cognitive Reframing for Catastrophizing",
+        "Ruhi Crisis Response Template",
+        "Ruhi Opening Template for Low Mood"
+      ]
+    },
+    {
+      "id": 30,
+      "question": "What is a chin tuck exercise and how do you do it properly?",
+      "target": "Active Posture Reset for Screen Time",
+      "top1_retrieved": "Ruhi Crisis Response Template",
+      "top1_score": 0.23257561828753656,
+      "top3_retrieved": [
+        "Ruhi Crisis Response Template",
+        "Ruhi Opening Template for Low Mood",
+        "Ruhi Persona and Tone Guide"
+      ]
+    }
+  ]
+}
