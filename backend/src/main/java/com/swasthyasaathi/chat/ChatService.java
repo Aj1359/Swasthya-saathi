@@ -4,6 +4,9 @@ import com.swasthyasaathi.gemini.GeminiClient;
 import com.swasthyasaathi.model.*;
 import com.swasthyasaathi.rag.RagService;
 import com.swasthyasaathi.repository.*;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -58,6 +61,39 @@ public class ChatService {
     private final FaceScanRepository faceScanRepository;
     private final VoiceMoodScanRepository voiceMoodScanRepository;
     private final ProfileRepository profileRepository;
+    private final MeterRegistry meterRegistry;
+    private final Timer safetyTimer;
+    private final Timer ragTimer;
+    private final Timer geminiTimer;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ChatService(GeminiClient geminiClient,
+                       RagService ragService,
+                       ChatMessageRepository chatMessageRepository,
+                       FaceScanRepository faceScanRepository,
+                       VoiceMoodScanRepository voiceMoodScanRepository,
+                       ProfileRepository profileRepository,
+                       MeterRegistry meterRegistry) {
+        this.geminiClient = geminiClient;
+        this.ragService = ragService;
+        this.chatMessageRepository = chatMessageRepository;
+        this.faceScanRepository = faceScanRepository;
+        this.voiceMoodScanRepository = voiceMoodScanRepository;
+        this.profileRepository = profileRepository;
+        this.meterRegistry = meterRegistry != null ? meterRegistry : Metrics.globalRegistry;
+        this.safetyTimer = Timer.builder("swasthya.pipeline.safety")
+                .description("Safety and intent detection latency")
+                .publishPercentiles(0.5, 0.95)
+                .register(this.meterRegistry);
+        this.ragTimer = Timer.builder("swasthya.pipeline.rag")
+                .description("RAG retrieval latency")
+                .publishPercentiles(0.5, 0.95)
+                .register(this.meterRegistry);
+        this.geminiTimer = Timer.builder("swasthya.pipeline.gemini")
+                .description("Gemini client synthesis latency")
+                .publishPercentiles(0.5, 0.95)
+                .register(this.meterRegistry);
+    }
 
     public ChatService(GeminiClient geminiClient,
                        RagService ragService,
@@ -65,12 +101,7 @@ public class ChatService {
                        FaceScanRepository faceScanRepository,
                        VoiceMoodScanRepository voiceMoodScanRepository,
                        ProfileRepository profileRepository) {
-        this.geminiClient = geminiClient;
-        this.ragService = ragService;
-        this.chatMessageRepository = chatMessageRepository;
-        this.faceScanRepository = faceScanRepository;
-        this.voiceMoodScanRepository = voiceMoodScanRepository;
-        this.profileRepository = profileRepository;
+        this(geminiClient, ragService, chatMessageRepository, faceScanRepository, voiceMoodScanRepository, profileRepository, Metrics.globalRegistry);
     }
 
     /**
@@ -95,7 +126,13 @@ public class ChatService {
         String sessionHash = Integer.toHexString(safeSessionId.hashCode());
 
         // ─── 2. SAFETY & INTENT DETECTION ─────────────────────────────────────────
-        ChatIntent detectedIntent = detectIntent(sanitizedContent);
+        ChatIntent detectedIntent;
+        Timer.Sample safetySample = Timer.start(meterRegistry);
+        try {
+            detectedIntent = detectIntent(sanitizedContent);
+        } finally {
+            safetySample.stop(safetyTimer);
+        }
 
         // ─── 3. CRISIS ISOLATED RESPONSE PATH (NO STANDARD RAG CHAT) ───────────────
         if (detectedIntent == ChatIntent.CRISIS) {
@@ -115,7 +152,13 @@ public class ChatService {
         }
 
         // ─── 4. RAG RETRIEVAL & CONTEXT ASSEMBLY LAYER ─────────────────────────────
-        List<KnowledgeChunk> retrievedChunks = ragService.retrieveRelevantChunks(sanitizedContent, 0.3, 4);
+        List<KnowledgeChunk> retrievedChunks;
+        Timer.Sample ragSample = Timer.start(meterRegistry);
+        try {
+            retrievedChunks = ragService.retrieveRelevantChunks(sanitizedContent, 0.3, 4);
+        } finally {
+            ragSample.stop(ragTimer);
+        }
         String ragContext = (retrievedChunks == null || retrievedChunks.isEmpty())
                 ? "No background reference guides retrieved."
                 : retrievedChunks.stream()
@@ -199,7 +242,13 @@ public class ChatService {
         );
 
         // ─── 5. GEMINI SYNTHESIS LAYER & OUTPUT VALIDATION ─────────────────────────
-        String rawReply = geminiClient.generateContent(systemPrompt, userPrompt, false);
+        String rawReply;
+        Timer.Sample geminiSample = Timer.start(meterRegistry);
+        try {
+            rawReply = geminiClient.generateContent(systemPrompt, userPrompt, false);
+        } finally {
+            geminiSample.stop(geminiTimer);
+        }
         String safeReply = sanitizeOutput(rawReply);
 
         saveMessagePair(profile, safeSessionId, sanitizedContent, safeReply);
